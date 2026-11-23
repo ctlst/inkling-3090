@@ -1,7 +1,11 @@
 {
   "device": "RTX 3090 24 GB",
   "cap_W": 350,
+  "public_tag": "v0.1.0-rc.1",
+  "upstream_weights": "ed40e7da625f594fc9c4990f5f66be24873c22d7",
   "context_limit": 196608,
+  "kv_dtype": "FP8",
+  "concurrency": 1,
   "release_commit": "ca0f681ded3a3aadc662e98d45a4c5764c971b79",
   "dspark7_card_tps": {
     "coder": 258.2461828754273,
@@ -12,6 +16,7 @@
   },
   "runs": {
     "on": {
+      "image_sha256": "sha256:e3d36393e6e1e2b0632e1966a22734009f7601359d17cb21e0f7e245e03a3f44",
       "coding": {
         "prompt_tokens": 573,
         "tokens": 3890,
@@ -443,7 +448,1501 @@
             }
           ]
         }
+      },
+      "agentx": {
+        "cold": {
+          "sum_request_s": 108.87065055799758,
+          "sum_ttft_s": 100.55662789499911,
+          "turns": [
+            {
+              "i": 0,
+              "source_sha256": "f5b07e4c174367fa575eda93ffe3d80818302221d72d47b153ecd99821a9b27c",
+              "input": 655,
+              "output": 20,
+              "ttft": 1.678193594001641,
+              "seconds": 1.843574581995199,
+              "decode_tps": 114.95682288626513,
+              "hits": 0.0,
+              "queries": 655.0
+            },
+            {
+              "i": 1,
+              "source_sha256": "9a2384753daeb0dcd70fac1fa96b76fb81f0972534408573e15197a43962d8e3",
+              "input": 63714,
+              "output": 395,
+              "ttft": 22.88007710000238,
+              "seconds": 25.677790362999076,
+              "decode_tps": 140.87073106319934,
+              "hits": 0.0,
+              "queries": 63714.0
+            },
+            {
+              "i": 2,
+              "source_sha256": "3443b083ef48cbc289472bd5e74dc2b9c82cfcdeede21fa8e3827af2f663d4cb",
+              "input": 65385,
+              "output": 265,
+              "ttft": 26.334474543000397,
+              "seconds": 27.913337279002008,
+              "decode_tps": 167.25852765045505,
+              "hits": 0.0,
+              "queries": 65385.0
+            },
+            {
+              "i": 3,
+              "source_sha256": "98a092109ee8de2c5579f36b146517def43ea2fce86cbbb7abc4bdbb815704f4",
+              "input": 66861,
+              "output": 257,
+              "ttft": 25.109051711995562,
+              "seconds": 27.318953727000917,
+              "decode_tps": 115.86767043540293,
+              "hits": 0.0,
+              "queries": 66861.0
+            },
+            {
+              "i": 4,
+              "source_sha256": "a1127f1627ac951d4d1a290f5508383342550a931ad50e96818150c1080ab1ec",
+              "input": 67956,
+              "output": 319,
+              "ttft": 24.55483094599913,
+              "seconds": 26.11699460700038,
+              "decode_tps": 203.63777731297725,
+              "hits": 0.0,
+              "queries": 67956.0
+            }
+          ]
+        },
+        "reuse": {
+          "sum_request_s": 36.64648878600565,
+          "sum_ttft_s": 26.812904693993914,
+          "turns": [
+            {
+              "i": 0,
+              "source_sha256": "f5b07e4c174367fa575eda93ffe3d80818302221d72d47b153ecd99821a9b27c",
+              "input": 655,
+              "output": 20,
+              "ttft": 0.1934712939983001,
+              "seconds": 0.35867024199978914,
+              "decode_tps": 115.08248031047269,
+              "hits": 0.0,
+              "queries": 655.0
+            },
+            {
+              "i": 1,
+              "source_sha256": "9a2384753daeb0dcd70fac1fa96b76fb81f0972534408573e15197a43962d8e3",
+              "input": 63714,
+              "output": 395,
+              "ttft": 21.36783074899722,
+              "seconds": 24.166131853002298,
+              "decode_tps": 140.82202799411027,
+              "hits": 0.0,
+              "queries": 63714.0
+            },
+            {
+              "i": 2,
+              "source_sha256": "3443b083ef48cbc289472bd5e74dc2b9c82cfcdeede21fa8e3827af2f663d4cb",
+              "input": 65385,
+              "output": 265,
+              "ttft": 2.3766625729986117,
+              "seconds": 4.036569397998392,
+              "decode_tps": 159.09683618782327,
+              "hits": 63616.0,
+              "queries": 65385.0
+            },
+            {
+              "i": 3,
+              "source_sha256": "98a092109ee8de2c5579f36b146517def43ea2fce86cbbb7abc4bdbb815704f4",
+              "input": 66861,
+              "output": 257,
+              "ttft": 0.8143501230006223,
+              "seconds": 2.8391412530036177,
+              "decode_tps": 126.47531553479773,
+              "hits": 65280.0,
+              "queries": 66861.0
+            },
+            {
+              "i": 4,
+              "source_sha256": "a1127f1627ac951d4d1a290f5508383342550a931ad50e96818150c1080ab1ec",
+              "input": 67956,
+              "output": 319,
+              "ttft": 2.060589954999159,
+              "seconds": 5.245976040001551,
+              "decode_tps": 99.84606086002765,
+              "hits": 66816.0,
+              "queries": 67956.0
+            }
+          ]
+        }
+      },
+      "guide": {
+        "id": "66ec3fa7821e116aacb1c75d",
+        "prompt_sha256": "3e970c803f439496aa0d5164de3bcc01ea9513960780efca68aacadc85624cd3",
+        "gold": "B",
+        "letter": "B",
+        "answer": "The correct answer is (B)",
+        "finish": "stop",
+        "usage": {
+          "prompt_tokens": 195015,
+          "total_tokens": 195511,
+          "completion_tokens": 496,
+          "completion_tokens_details": {
+            "reasoning_tokens": 482
+          }
+        },
+        "ttft": 86.51374355400185,
+        "wall": 90.774299651006,
+        "prefill_tps": 2254.150519775759,
+        "decode_tps": 116.1820167907338,
+        "prefix_hits": 0.0
+      },
+      "mmlu_pro": {
+        "correct": 17,
+        "count": 24,
+        "rows": [
+          {
+            "id": 785,
+            "letter": "A",
+            "gold": "A",
+            "finish": "stop",
+            "prompt_sha256": "9317fe4f0f58bbf4200aaf5ca3c8b72283e96ad3e2c2fd1f96e09b2beec959cc",
+            "usage": {
+              "prompt_tokens": 172,
+              "total_tokens": 291,
+              "completion_tokens": 119,
+              "completion_tokens_details": {
+                "reasoning_tokens": 111
+              }
+            }
+          },
+          {
+            "id": 633,
+            "letter": "D",
+            "gold": "I",
+            "finish": "stop",
+            "prompt_sha256": "ffa52f05c607301698ac57065fbc7fabe43c30493ac3d4f529671c64f668380d",
+            "usage": {
+              "prompt_tokens": 109,
+              "total_tokens": 666,
+              "completion_tokens": 557,
+              "completion_tokens_details": {
+                "reasoning_tokens": 549
+              }
+            }
+          },
+          {
+            "id": 388,
+            "letter": "D",
+            "gold": "D",
+            "finish": "stop",
+            "prompt_sha256": "5ffc2fe9a171b5c1d22d7531a36f264f576a20210cbde9443d682730f5ac1396",
+            "usage": {
+              "prompt_tokens": 136,
+              "total_tokens": 600,
+              "completion_tokens": 464,
+              "completion_tokens_details": {
+                "reasoning_tokens": 456
+              }
+            }
+          },
+          {
+            "id": 732,
+            "letter": "A",
+            "gold": "A",
+            "finish": "stop",
+            "prompt_sha256": "5802c7f3c9d87164789a632b45f46c7445fa0f7001ef831b3dcf9e73b92d8436",
+            "usage": {
+              "prompt_tokens": 206,
+              "total_tokens": 398,
+              "completion_tokens": 192,
+              "completion_tokens_details": {
+                "reasoning_tokens": 184
+              }
+            }
+          },
+          {
+            "id": 7368,
+            "letter": "C",
+            "gold": "C",
+            "finish": "stop",
+            "prompt_sha256": "c0625decda6d28669d61cbe1a86e2567831dfd1abc2ebc043a62af81a385c181",
+            "usage": {
+              "prompt_tokens": 78,
+              "total_tokens": 208,
+              "completion_tokens": 130,
+              "completion_tokens_details": {
+                "reasoning_tokens": 122
+              }
+            }
+          },
+          {
+            "id": 7010,
+            "letter": "E",
+            "gold": "E",
+            "finish": "stop",
+            "prompt_sha256": "777de8e95c92938525ab61cb403f3dbc6e3590c688fb7454dfb7de40813b8e69",
+            "usage": {
+              "prompt_tokens": 199,
+              "total_tokens": 320,
+              "completion_tokens": 121,
+              "completion_tokens_details": {
+                "reasoning_tokens": 113
+              }
+            }
+          },
+          {
+            "id": 6871,
+            "letter": "C",
+            "gold": "C",
+            "finish": "stop",
+            "prompt_sha256": "0658c29f6263e2c8ecf7291e89a040187491f8d3aec6d67e74facd2890a82375",
+            "usage": {
+              "prompt_tokens": 278,
+              "total_tokens": 428,
+              "completion_tokens": 150,
+              "completion_tokens_details": {
+                "reasoning_tokens": 142
+              }
+            }
+          },
+          {
+            "id": 7503,
+            "letter": "F",
+            "gold": "F",
+            "finish": "stop",
+            "prompt_sha256": "72d438e0072147f318b590b07ead17b192d0761fa057355790380a3f286b163c",
+            "usage": {
+              "prompt_tokens": 153,
+              "total_tokens": 290,
+              "completion_tokens": 137,
+              "completion_tokens_details": {
+                "reasoning_tokens": 129
+              }
+            }
+          },
+          {
+            "id": 4704,
+            "letter": "H",
+            "gold": "H",
+            "finish": "stop",
+            "prompt_sha256": "e63e02b96d53ca1e376a0c61916c1ebfe1d1f529290098f6fd678cf4d476ef82",
+            "usage": {
+              "prompt_tokens": 194,
+              "total_tokens": 345,
+              "completion_tokens": 151,
+              "completion_tokens_details": {
+                "reasoning_tokens": 143
+              }
+            }
+          },
+          {
+            "id": 4858,
+            "letter": "F",
+            "gold": "E",
+            "finish": "stop",
+            "prompt_sha256": "8489400c6fa983014ad61b3615f55b5f495fcd742f01058cf39a1da99ad84e92",
+            "usage": {
+              "prompt_tokens": 426,
+              "total_tokens": 699,
+              "completion_tokens": 273,
+              "completion_tokens_details": {
+                "reasoning_tokens": 265
+              }
+            }
+          },
+          {
+            "id": 4884,
+            "letter": "G",
+            "gold": "J",
+            "finish": "stop",
+            "prompt_sha256": "7e4e66d599f2c11cd77ce9d5c73f84c3694228095680e27623f2b2d89ae52f6d",
+            "usage": {
+              "prompt_tokens": 307,
+              "total_tokens": 1690,
+              "completion_tokens": 1383,
+              "completion_tokens_details": {
+                "reasoning_tokens": 1375
+              }
+            }
+          },
+          {
+            "id": 4835,
+            "letter": "A",
+            "gold": "A",
+            "finish": "stop",
+            "prompt_sha256": "3a31e32bb20d2e8bc5301dc2d060cca86982a7d5e90f7013c498e381606baad3",
+            "usage": {
+              "prompt_tokens": 251,
+              "total_tokens": 1030,
+              "completion_tokens": 779,
+              "completion_tokens_details": {
+                "reasoning_tokens": 771
+              }
+            }
+          },
+          {
+            "id": 8357,
+            "letter": "F",
+            "gold": "F",
+            "finish": "stop",
+            "prompt_sha256": "1ec33539bfad4e8acc32bf5b52d496f180ef3efe358d6e105dc9ed05b20e647d",
+            "usage": {
+              "prompt_tokens": 208,
+              "total_tokens": 482,
+              "completion_tokens": 274,
+              "completion_tokens_details": {
+                "reasoning_tokens": 266
+              }
+            }
+          },
+          {
+            "id": 8501,
+            "letter": "E",
+            "gold": "E",
+            "finish": "stop",
+            "prompt_sha256": "99b12539f41c1306b9f4f8524997f8524ace681b9c1f05611f5330a813b229fb",
+            "usage": {
+              "prompt_tokens": 124,
+              "total_tokens": 245,
+              "completion_tokens": 121,
+              "completion_tokens_details": {
+                "reasoning_tokens": 113
+              }
+            }
+          },
+          {
+            "id": 8638,
+            "letter": "C",
+            "gold": "C",
+            "finish": "stop",
+            "prompt_sha256": "ce91a88d1205d21d07f1aa4c470dbea9cb71c31024139a90019fe78b4b62d4cc",
+            "usage": {
+              "prompt_tokens": 242,
+              "total_tokens": 1848,
+              "completion_tokens": 1606,
+              "completion_tokens_details": {
+                "reasoning_tokens": 1598
+              }
+            }
+          },
+          {
+            "id": 8876,
+            "letter": "F",
+            "gold": "E",
+            "finish": "stop",
+            "prompt_sha256": "09f6f4c85b7caa59099dca4b694b8a658fef22b46b2efc873a6274b984a30569",
+            "usage": {
+              "prompt_tokens": 140,
+              "total_tokens": 347,
+              "completion_tokens": 207,
+              "completion_tokens_details": {
+                "reasoning_tokens": 199
+              }
+            }
+          },
+          {
+            "id": 11024,
+            "letter": "G",
+            "gold": "B",
+            "finish": "stop",
+            "prompt_sha256": "c4bcfa76f66684fc61587ca58ec82f7ec96d6fa902ad2796cabeb8cc6d833115",
+            "usage": {
+              "prompt_tokens": 178,
+              "total_tokens": 643,
+              "completion_tokens": 465,
+              "completion_tokens_details": {
+                "reasoning_tokens": 457
+              }
+            }
+          },
+          {
+            "id": 11261,
+            "letter": "I",
+            "gold": "I",
+            "finish": "stop",
+            "prompt_sha256": "c13f99af6a8b32a92647dab382668208c5fa933aa56ba229021d014763f81da0",
+            "usage": {
+              "prompt_tokens": 214,
+              "total_tokens": 523,
+              "completion_tokens": 309,
+              "completion_tokens_details": {
+                "reasoning_tokens": 301
+              }
+            }
+          },
+          {
+            "id": 10776,
+            "letter": "I",
+            "gold": "I",
+            "finish": "stop",
+            "prompt_sha256": "87b6a9678ad90e20afbfc01cf809e819a034139426a9dfc2fc20802567fa0449",
+            "usage": {
+              "prompt_tokens": 153,
+              "total_tokens": 755,
+              "completion_tokens": 602,
+              "completion_tokens_details": {
+                "reasoning_tokens": 594
+              }
+            }
+          },
+          {
+            "id": 11185,
+            "letter": "H",
+            "gold": "J",
+            "finish": "stop",
+            "prompt_sha256": "e5ee4dfef88953207752fd25fe53fca0e1da86f32b69fc6f5c27f0f075bf3d08",
+            "usage": {
+              "prompt_tokens": 143,
+              "total_tokens": 519,
+              "completion_tokens": 376,
+              "completion_tokens_details": {
+                "reasoning_tokens": 368
+              }
+            }
+          },
+          {
+            "id": 2677,
+            "letter": "H",
+            "gold": "H",
+            "finish": "stop",
+            "prompt_sha256": "d0f3c4b8bd79989678c8ffa41b17ba47a67ab86eb1c665f8320ddf05ecdf24fc",
+            "usage": {
+              "prompt_tokens": 319,
+              "total_tokens": 640,
+              "completion_tokens": 321,
+              "completion_tokens_details": {
+                "reasoning_tokens": 313
+              }
+            }
+          },
+          {
+            "id": 2785,
+            "letter": "E",
+            "gold": "E",
+            "finish": "stop",
+            "prompt_sha256": "3d1f089877b54e78dbe98b3629627628071f70a66ca378ffeecd6c5a43bc8798",
+            "usage": {
+              "prompt_tokens": 272,
+              "total_tokens": 444,
+              "completion_tokens": 172,
+              "completion_tokens_details": {
+                "reasoning_tokens": 164
+              }
+            }
+          },
+          {
+            "id": 2327,
+            "letter": "E",
+            "gold": "E",
+            "finish": "stop",
+            "prompt_sha256": "6140d2fbea7743f2a06b8356fb0c1bcb61688e17f84dbb4eb6f298f032325437",
+            "usage": {
+              "prompt_tokens": 261,
+              "total_tokens": 409,
+              "completion_tokens": 148,
+              "completion_tokens_details": {
+                "reasoning_tokens": 140
+              }
+            }
+          },
+          {
+            "id": 2446,
+            "letter": "E",
+            "gold": "D",
+            "finish": "stop",
+            "prompt_sha256": "9cb423c537b612fdb4387e7e3b4c7abdb3407b8b666f8f38a0c6c282451467a4",
+            "usage": {
+              "prompt_tokens": 110,
+              "total_tokens": 404,
+              "completion_tokens": 294,
+              "completion_tokens_details": {
+                "reasoning_tokens": 286
+              }
+            }
+          }
+        ]
+      }
+    },
+    "off": {
+      "image_sha256": "sha256:e3d36393e6e1e2b0632e1966a22734009f7601359d17cb21e0f7e245e03a3f44",
+      "coding": {
+        "prompt_tokens": 573,
+        "tokens": 4025,
+        "decode_tps": 95.9890780581399,
+        "request_seconds": 45.80906894099462,
+        "ttft": 3.8875777319990448,
+        "stop": "stop",
+        "sha256": "319e9380c1f5bda874c071666c92dcdee5d0ad0c3e20512c07e6f5dbec143678",
+        "raw": {
+          "external": 0,
+          "self": {
+            "exit": 1,
+            "tests": null,
+            "pass": false
+          },
+          "failures": [
+            "file, counts, means, order, quoted comma",
+            "stdin and service filter",
+            "case-sensitive filter",
+            "top zero preserves count",
+            "top with ties",
+            "nearest-rank p95",
+            "empty rows and whitespace",
+            "header only"
+          ]
+        },
+        "extracted": {
+          "external": 0,
+          "self": {
+            "exit": 1,
+            "tests": null,
+            "pass": false
+          },
+          "failures": [
+            "file, counts, means, order, quoted comma",
+            "stdin and service filter",
+            "case-sensitive filter",
+            "top zero preserves count",
+            "top with ties",
+            "nearest-rank p95",
+            "empty rows and whitespace",
+            "header only"
+          ]
+        }
+      },
+      "tasks": {
+        "chat": {
+          "decode_tps": 97.15505688052842,
+          "wall_s": 1.2545430199970724,
+          "passed": 3,
+          "count": 3,
+          "trials": [
+            {
+              "trial": 1,
+              "case": "chat",
+              "request_sha256": "78177b90331021242425ca9a7e05aa2a95eea764c45dc3bf63823989bc9a183d",
+              "input": 92,
+              "output": 118,
+              "ttft_s": 0.05083731799822999,
+              "wall_s": 1.253948452998884,
+              "decode_tps": 97.25228724001363,
+              "accepted": 0,
+              "proposed": 0,
+              "prefix_hits": 0,
+              "answer": "Book Room B, and you\u2019ll have 3 empty seats.",
+              "calls": [],
+              "checks": {
+                "room B": true,
+                "three seats": true,
+                "completed": true
+              },
+              "passed": true
+            },
+            {
+              "trial": 2,
+              "case": "chat",
+              "request_sha256": "78177b90331021242425ca9a7e05aa2a95eea764c45dc3bf63823989bc9a183d",
+              "input": 92,
+              "output": 118,
+              "ttft_s": 0.05322055999567965,
+              "wall_s": 1.257523301996116,
+              "decode_tps": 97.15505688052842,
+              "accepted": 0,
+              "proposed": 0,
+              "prefix_hits": 0,
+              "answer": "Book Room B, and you\u2019ll have 3 empty seats.",
+              "calls": [],
+              "checks": {
+                "room B": true,
+                "three seats": true,
+                "completed": true
+              },
+              "passed": true
+            },
+            {
+              "trial": 3,
+              "case": "chat",
+              "request_sha256": "78177b90331021242425ca9a7e05aa2a95eea764c45dc3bf63823989bc9a183d",
+              "input": 92,
+              "output": 118,
+              "ttft_s": 0.04983558899402851,
+              "wall_s": 1.2545430199970724,
+              "decode_tps": 97.12433593759266,
+              "accepted": 0,
+              "proposed": 0,
+              "prefix_hits": 0,
+              "answer": "Book Room B, and you\u2019ll have 3 empty seats.",
+              "calls": [],
+              "checks": {
+                "room B": true,
+                "three seats": true,
+                "completed": true
+              },
+              "passed": true
+            }
+          ]
+        },
+        "tool": {
+          "decode_tps": 97.11576761628805,
+          "wall_s": 1.268994214005943,
+          "passed": 3,
+          "count": 3,
+          "trials": [
+            {
+              "trial": 1,
+              "case": "tool",
+              "request_sha256": "5b031684c0248300f54fefb42f674790efe2d773a3953623432961487691e27a",
+              "input": 159,
+              "output": 118,
+              "ttft_s": 0.070919154000876,
+              "wall_s": 1.2755542720042286,
+              "decode_tps": 97.13156548309274,
+              "accepted": 0,
+              "proposed": 0,
+              "prefix_hits": 0,
+              "answer": "",
+              "calls": [
+                {
+                  "name": "find_departures",
+                  "arguments": "{\"after\":\"14:30\",\"destination\":\"Ashford\",\"origin\":\"Dover\"}"
+                }
+              ],
+              "checks": {
+                "function": true,
+                "arguments": true,
+                "completed": true
+              },
+              "passed": true
+            },
+            {
+              "trial": 2,
+              "case": "tool",
+              "request_sha256": "5b031684c0248300f54fefb42f674790efe2d773a3953623432961487691e27a",
+              "input": 159,
+              "output": 118,
+              "ttft_s": 0.06382199100335129,
+              "wall_s": 1.2687952400010545,
+              "decode_tps": 97.10506326921349,
+              "accepted": 0,
+              "proposed": 0,
+              "prefix_hits": 0,
+              "answer": "",
+              "calls": [
+                {
+                  "name": "find_departures",
+                  "arguments": "{\"after\":\"14:30\",\"destination\":\"Ashford\",\"origin\":\"Dover\"}"
+                }
+              ],
+              "checks": {
+                "function": true,
+                "arguments": true,
+                "completed": true
+              },
+              "passed": true
+            },
+            {
+              "trial": 3,
+              "case": "tool",
+              "request_sha256": "5b031684c0248300f54fefb42f674790efe2d773a3953623432961487691e27a",
+              "input": 159,
+              "output": 118,
+              "ttft_s": 0.06420622700534295,
+              "wall_s": 1.268994214005943,
+              "decode_tps": 97.11576761628805,
+              "accepted": 0,
+              "proposed": 0,
+              "prefix_hits": 0,
+              "answer": "",
+              "calls": [
+                {
+                  "name": "find_departures",
+                  "arguments": "{\"after\":\"14:30\",\"destination\":\"Ashford\",\"origin\":\"Dover\"}"
+                }
+              ],
+              "checks": {
+                "function": true,
+                "arguments": true,
+                "completed": true
+              },
+              "passed": true
+            }
+          ]
+        },
+        "vision": {
+          "decode_tps": 97.2519665979077,
+          "wall_s": 1.3146249769997667,
+          "passed": 3,
+          "count": 3,
+          "trials": [
+            {
+              "trial": 1,
+              "case": "vision",
+              "request_sha256": "45eb47388777b2968bb8e89a82653c2d65c783a77798eccbe4c746aa7329627e",
+              "input": 74,
+              "output": 124,
+              "ttft_s": 0.048033817001851276,
+              "wall_s": 1.3128374579973752,
+              "decode_tps": 97.2519665979077,
+              "accepted": 0,
+              "proposed": 0,
+              "prefix_hits": 0,
+              "answer": "blue, red, green",
+              "calls": [],
+              "checks": {
+                "bar order": true,
+                "completed": true
+              },
+              "passed": true
+            },
+            {
+              "trial": 2,
+              "case": "vision",
+              "request_sha256": "45eb47388777b2968bb8e89a82653c2d65c783a77798eccbe4c746aa7329627e",
+              "input": 74,
+              "output": 124,
+              "ttft_s": 0.05030547999922419,
+              "wall_s": 1.3146249769997667,
+              "decode_tps": 97.28919885958366,
+              "accepted": 0,
+              "proposed": 0,
+              "prefix_hits": 0,
+              "answer": "blue, red, green",
+              "calls": [],
+              "checks": {
+                "bar order": true,
+                "completed": true
+              },
+              "passed": true
+            },
+            {
+              "trial": 3,
+              "case": "vision",
+              "request_sha256": "45eb47388777b2968bb8e89a82653c2d65c783a77798eccbe4c746aa7329627e",
+              "input": 74,
+              "output": 124,
+              "ttft_s": 0.04889072299556574,
+              "wall_s": 1.3147196559948497,
+              "decode_tps": 97.17757851742489,
+              "accepted": 0,
+              "proposed": 0,
+              "prefix_hits": 0,
+              "answer": "blue, red, green",
+              "calls": [],
+              "checks": {
+                "bar order": true,
+                "completed": true
+              },
+              "passed": true
+            }
+          ]
+        },
+        "prose": {
+          "decode_tps": 96.77432166842152,
+          "wall_s": 10.625799943001766,
+          "passed": 0,
+          "count": 3,
+          "trials": [
+            {
+              "trial": 1,
+              "case": "prose",
+              "request_sha256": "70aabff8c117e60c964bf562eda71fe734f022bd67ce8620fd0ad59df137bd41",
+              "input": 110,
+              "output": 1024,
+              "ttft_s": 0.05488996000349289,
+              "wall_s": 10.622731941999518,
+              "decode_tps": 96.80492808280061,
+              "accepted": 0,
+              "proposed": 0,
+              "prefix_hits": 0,
+              "answer": "",
+              "calls": [],
+              "checks": {
+                "length": false,
+                "branch": false,
+                "roof": false,
+                "June 12": false,
+                "July 3": false,
+                "book drop": false,
+                "children's room": false,
+                "hours": false,
+                "completed": false
+              },
+              "passed": false
+            },
+            {
+              "trial": 2,
+              "case": "prose",
+              "request_sha256": "70aabff8c117e60c964bf562eda71fe734f022bd67ce8620fd0ad59df137bd41",
+              "input": 110,
+              "output": 1024,
+              "ttft_s": 0.054712857003323734,
+              "wall_s": 10.625799943001766,
+              "decode_tps": 96.77432166842152,
+              "accepted": 0,
+              "proposed": 0,
+              "prefix_hits": 0,
+              "answer": "",
+              "calls": [],
+              "checks": {
+                "length": false,
+                "branch": false,
+                "roof": false,
+                "June 12": false,
+                "July 3": false,
+                "book drop": false,
+                "children's room": false,
+                "hours": false,
+                "completed": false
+              },
+              "passed": false
+            },
+            {
+              "trial": 3,
+              "case": "prose",
+              "request_sha256": "70aabff8c117e60c964bf562eda71fe734f022bd67ce8620fd0ad59df137bd41",
+              "input": 110,
+              "output": 1024,
+              "ttft_s": 0.05400736199953826,
+              "wall_s": 10.625983505997283,
+              "decode_tps": 96.76637110727704,
+              "accepted": 0,
+              "proposed": 0,
+              "prefix_hits": 0,
+              "answer": "",
+              "calls": [],
+              "checks": {
+                "length": false,
+                "branch": false,
+                "roof": false,
+                "June 12": false,
+                "July 3": false,
+                "book drop": false,
+                "children's room": false,
+                "hours": false,
+                "completed": false
+              },
+              "passed": false
+            }
+          ]
+        },
+        "bounded_prose": {
+          "decode_tps": 97.05032124135445,
+          "wall_s": 4.340142054003081,
+          "passed": 0,
+          "count": 3,
+          "trials": [
+            {
+              "trial": 1,
+              "case": "prose",
+              "request_sha256": "b2759903c2264e211388056f94eaadf483621d945c0aa735debb4fde9929aff0",
+              "input": 110,
+              "output": 417,
+              "ttft_s": 0.053567002003546804,
+              "wall_s": 4.340142054003081,
+              "decode_tps": 97.05032124135445,
+              "accepted": 0,
+              "proposed": 0,
+              "prefix_hits": 0,
+              "answer": "The North Branch library will reopen on June 12. Weekday hours will be 9 am to 6 pm. The book drop on Cedar Street will remain available and is not affected by the closure. The children\u2019s room will not reopen on June 12; it will reopen separately on July 3. Until July 3, the main library is available, but the children\u2019s room should be treated as closed. Members should plan visits accordingly: use the North Branch for general materials and services from June 12, and check back before July 3 if a children\u2019s room visit is needed. No new services are being added at this time. If you have questions about a specific space, contact the library before your visit.",
+              "calls": [],
+              "checks": {
+                "length": true,
+                "branch": true,
+                "roof": false,
+                "June 12": true,
+                "July 3": true,
+                "book drop": true,
+                "children's room": true,
+                "hours": true,
+                "completed": true
+              },
+              "passed": false
+            },
+            {
+              "trial": 2,
+              "case": "prose",
+              "request_sha256": "b2759903c2264e211388056f94eaadf483621d945c0aa735debb4fde9929aff0",
+              "input": 110,
+              "output": 417,
+              "ttft_s": 0.0541231829993194,
+              "wall_s": 4.3408487099950435,
+              "decode_tps": 97.04487808925506,
+              "accepted": 0,
+              "proposed": 0,
+              "prefix_hits": 0,
+              "answer": "The North Branch library will reopen on June 12. Weekday hours will be 9 am to 6 pm. The book drop on Cedar Street will remain available and is not affected by the closure. The children\u2019s room will not reopen on June 12; it will reopen separately on July 3. Until July 3, the main library is available, but the children\u2019s room should be treated as closed. Members should plan visits accordingly: use the North Branch for general materials and services from June 12, and check back before July 3 if a children\u2019s room visit is needed. No new services are being added at this time. If you have questions about a specific space, contact the library before your visit.",
+              "calls": [],
+              "checks": {
+                "length": true,
+                "branch": true,
+                "roof": false,
+                "June 12": true,
+                "July 3": true,
+                "book drop": true,
+                "children's room": true,
+                "hours": true,
+                "completed": true
+              },
+              "passed": false
+            },
+            {
+              "trial": 3,
+              "case": "prose",
+              "request_sha256": "b2759903c2264e211388056f94eaadf483621d945c0aa735debb4fde9929aff0",
+              "input": 110,
+              "output": 417,
+              "ttft_s": 0.05374360000132583,
+              "wall_s": 4.339719279996643,
+              "decode_tps": 97.06198893884897,
+              "accepted": 0,
+              "proposed": 0,
+              "prefix_hits": 0,
+              "answer": "The North Branch library will reopen on June 12. Weekday hours will be 9 am to 6 pm. The book drop on Cedar Street will remain available and is not affected by the closure. The children\u2019s room will not reopen on June 12; it will reopen separately on July 3. Until July 3, the main library is available, but the children\u2019s room should be treated as closed. Members should plan visits accordingly: use the North Branch for general materials and services from June 12, and check back before July 3 if a children\u2019s room visit is needed. No new services are being added at this time. If you have questions about a specific space, contact the library before your visit.",
+              "calls": [],
+              "checks": {
+                "length": true,
+                "branch": true,
+                "roof": false,
+                "June 12": true,
+                "July 3": true,
+                "book drop": true,
+                "children's room": true,
+                "hours": true,
+                "completed": true
+              },
+              "passed": false
+            }
+          ]
+        }
+      },
+      "agentx": {
+        "cold": {
+          "sum_request_s": 112.21964113599097,
+          "sum_ttft_s": 97.25601745999302,
+          "turns": [
+            {
+              "i": 0,
+              "source_sha256": "f5b07e4c174367fa575eda93ffe3d80818302221d72d47b153ecd99821a9b27c",
+              "input": 655,
+              "output": 20,
+              "ttft": 1.5925272320018848,
+              "seconds": 1.7899155410050298,
+              "decode_tps": 96.31062825414655,
+              "hits": 0.0,
+              "queries": 655.0
+            },
+            {
+              "i": 1,
+              "source_sha256": "9a2384753daeb0dcd70fac1fa96b76fb81f0972534408573e15197a43962d8e3",
+              "input": 63714,
+              "output": 395,
+              "ttft": 22.587055042997235,
+              "seconds": 27.283455278993642,
+              "decode_tps": 83.90389527808497,
+              "hits": 0.0,
+              "queries": 63714.0
+            },
+            {
+              "i": 2,
+              "source_sha256": "3443b083ef48cbc289472bd5e74dc2b9c82cfcdeede21fa8e3827af2f663d4cb",
+              "input": 65385,
+              "output": 265,
+              "ttft": 24.070802615999128,
+              "seconds": 27.221495313999185,
+              "decode_tps": 83.80957694217561,
+              "hits": 0.0,
+              "queries": 65385.0
+            },
+            {
+              "i": 3,
+              "source_sha256": "98a092109ee8de2c5579f36b146517def43ea2fce86cbbb7abc4bdbb815704f4",
+              "input": 66861,
+              "output": 257,
+              "ttft": 24.740095190994907,
+              "seconds": 27.822395602997858,
+              "decode_tps": 83.07012472364627,
+              "hits": 0.0,
+              "queries": 66861.0
+            },
+            {
+              "i": 4,
+              "source_sha256": "a1127f1627ac951d4d1a290f5508383342550a931ad50e96818150c1080ab1ec",
+              "input": 67956,
+              "output": 319,
+              "ttft": 24.265537377999863,
+              "seconds": 28.102379398995254,
+              "decode_tps": 82.8910596348401,
+              "hits": 0.0,
+              "queries": 67956.0
+            }
+          ]
+        },
+        "reuse": {
+          "sum_request_s": 42.7931458959938,
+          "sum_ttft_s": 27.80461212999944,
+          "turns": [
+            {
+              "i": 0,
+              "source_sha256": "f5b07e4c174367fa575eda93ffe3d80818302221d72d47b153ecd99821a9b27c",
+              "input": 655,
+              "output": 20,
+              "ttft": 0.18882605499675265,
+              "seconds": 0.38672819799830904,
+              "decode_tps": 96.03112168233402,
+              "hits": 0.0,
+              "queries": 655.0
+            },
+            {
+              "i": 1,
+              "source_sha256": "9a2384753daeb0dcd70fac1fa96b76fb81f0972534408573e15197a43962d8e3",
+              "input": 63714,
+              "output": 395,
+              "ttft": 21.30494867300149,
+              "seconds": 26.015128599996387,
+              "decode_tps": 83.65644142245787,
+              "hits": 0.0,
+              "queries": 63714.0
+            },
+            {
+              "i": 2,
+              "source_sha256": "3443b083ef48cbc289472bd5e74dc2b9c82cfcdeede21fa8e3827af2f663d4cb",
+              "input": 65385,
+              "output": 265,
+              "ttft": 2.251901966999867,
+              "seconds": 5.407707998994738,
+              "decode_tps": 83.66852261381788,
+              "hits": 63680.0,
+              "queries": 65385.0
+            },
+            {
+              "i": 3,
+              "source_sha256": "98a092109ee8de2c5579f36b146517def43ea2fce86cbbb7abc4bdbb815704f4",
+              "input": 66861,
+              "output": 257,
+              "ttft": 2.2134746619994985,
+              "seconds": 5.299264182998741,
+              "decode_tps": 82.97541536783638,
+              "hits": 65344.0,
+              "queries": 66861.0
+            },
+            {
+              "i": 4,
+              "source_sha256": "a1127f1627ac951d4d1a290f5508383342550a931ad50e96818150c1080ab1ec",
+              "input": 67956,
+              "output": 319,
+              "ttft": 1.8454607730018324,
+              "seconds": 5.684316916005628,
+              "decode_tps": 82.84931420067635,
+              "hits": 66816.0,
+              "queries": 67956.0
+            }
+          ]
+        }
+      },
+      "guide": {
+        "id": "66ec3fa7821e116aacb1c75d",
+        "prompt_sha256": "3e970c803f439496aa0d5164de3bcc01ea9513960780efca68aacadc85624cd3",
+        "gold": "B",
+        "letter": "B",
+        "answer": "The correct answer is (B)",
+        "finish": "stop",
+        "usage": {
+          "prompt_tokens": 195015,
+          "total_tokens": 195572,
+          "completion_tokens": 557,
+          "completion_tokens_details": {
+            "reasoning_tokens": 543
+          }
+        },
+        "ttft": 86.00549107499683,
+        "wall": 94.47984742299741,
+        "prefill_tps": 2267.471501673618,
+        "decode_tps": 65.6097026331895,
+        "prefix_hits": 0.0
+      },
+      "mmlu_pro": {
+        "correct": 18,
+        "count": 24,
+        "rows": [
+          {
+            "id": 785,
+            "letter": "A",
+            "gold": "A",
+            "finish": "stop",
+            "prompt_sha256": "9317fe4f0f58bbf4200aaf5ca3c8b72283e96ad3e2c2fd1f96e09b2beec959cc",
+            "usage": {
+              "prompt_tokens": 172,
+              "total_tokens": 291,
+              "completion_tokens": 119,
+              "completion_tokens_details": {
+                "reasoning_tokens": 111
+              }
+            }
+          },
+          {
+            "id": 633,
+            "letter": "D",
+            "gold": "I",
+            "finish": "stop",
+            "prompt_sha256": "ffa52f05c607301698ac57065fbc7fabe43c30493ac3d4f529671c64f668380d",
+            "usage": {
+              "prompt_tokens": 109,
+              "total_tokens": 817,
+              "completion_tokens": 708,
+              "completion_tokens_details": {
+                "reasoning_tokens": 700
+              }
+            }
+          },
+          {
+            "id": 388,
+            "letter": "D",
+            "gold": "D",
+            "finish": "stop",
+            "prompt_sha256": "5ffc2fe9a171b5c1d22d7531a36f264f576a20210cbde9443d682730f5ac1396",
+            "usage": {
+              "prompt_tokens": 136,
+              "total_tokens": 644,
+              "completion_tokens": 508,
+              "completion_tokens_details": {
+                "reasoning_tokens": 500
+              }
+            }
+          },
+          {
+            "id": 732,
+            "letter": "A",
+            "gold": "A",
+            "finish": "stop",
+            "prompt_sha256": "5802c7f3c9d87164789a632b45f46c7445fa0f7001ef831b3dcf9e73b92d8436",
+            "usage": {
+              "prompt_tokens": 206,
+              "total_tokens": 388,
+              "completion_tokens": 182,
+              "completion_tokens_details": {
+                "reasoning_tokens": 174
+              }
+            }
+          },
+          {
+            "id": 7368,
+            "letter": "C",
+            "gold": "C",
+            "finish": "stop",
+            "prompt_sha256": "c0625decda6d28669d61cbe1a86e2567831dfd1abc2ebc043a62af81a385c181",
+            "usage": {
+              "prompt_tokens": 78,
+              "total_tokens": 208,
+              "completion_tokens": 130,
+              "completion_tokens_details": {
+                "reasoning_tokens": 122
+              }
+            }
+          },
+          {
+            "id": 7010,
+            "letter": "E",
+            "gold": "E",
+            "finish": "stop",
+            "prompt_sha256": "777de8e95c92938525ab61cb403f3dbc6e3590c688fb7454dfb7de40813b8e69",
+            "usage": {
+              "prompt_tokens": 199,
+              "total_tokens": 322,
+              "completion_tokens": 123,
+              "completion_tokens_details": {
+                "reasoning_tokens": 115
+              }
+            }
+          },
+          {
+            "id": 6871,
+            "letter": "C",
+            "gold": "C",
+            "finish": "stop",
+            "prompt_sha256": "0658c29f6263e2c8ecf7291e89a040187491f8d3aec6d67e74facd2890a82375",
+            "usage": {
+              "prompt_tokens": 278,
+              "total_tokens": 428,
+              "completion_tokens": 150,
+              "completion_tokens_details": {
+                "reasoning_tokens": 142
+              }
+            }
+          },
+          {
+            "id": 7503,
+            "letter": "F",
+            "gold": "F",
+            "finish": "stop",
+            "prompt_sha256": "72d438e0072147f318b590b07ead17b192d0761fa057355790380a3f286b163c",
+            "usage": {
+              "prompt_tokens": 153,
+              "total_tokens": 330,
+              "completion_tokens": 177,
+              "completion_tokens_details": {
+                "reasoning_tokens": 169
+              }
+            }
+          },
+          {
+            "id": 4704,
+            "letter": "H",
+            "gold": "H",
+            "finish": "stop",
+            "prompt_sha256": "e63e02b96d53ca1e376a0c61916c1ebfe1d1f529290098f6fd678cf4d476ef82",
+            "usage": {
+              "prompt_tokens": 194,
+              "total_tokens": 290,
+              "completion_tokens": 96,
+              "completion_tokens_details": {
+                "reasoning_tokens": 88
+              }
+            }
+          },
+          {
+            "id": 4858,
+            "letter": "F",
+            "gold": "E",
+            "finish": "stop",
+            "prompt_sha256": "8489400c6fa983014ad61b3615f55b5f495fcd742f01058cf39a1da99ad84e92",
+            "usage": {
+              "prompt_tokens": 426,
+              "total_tokens": 803,
+              "completion_tokens": 377,
+              "completion_tokens_details": {
+                "reasoning_tokens": 369
+              }
+            }
+          },
+          {
+            "id": 4884,
+            "letter": "J",
+            "gold": "J",
+            "finish": "stop",
+            "prompt_sha256": "7e4e66d599f2c11cd77ce9d5c73f84c3694228095680e27623f2b2d89ae52f6d",
+            "usage": {
+              "prompt_tokens": 307,
+              "total_tokens": 1440,
+              "completion_tokens": 1133,
+              "completion_tokens_details": {
+                "reasoning_tokens": 1125
+              }
+            }
+          },
+          {
+            "id": 4835,
+            "letter": "A",
+            "gold": "A",
+            "finish": "stop",
+            "prompt_sha256": "3a31e32bb20d2e8bc5301dc2d060cca86982a7d5e90f7013c498e381606baad3",
+            "usage": {
+              "prompt_tokens": 251,
+              "total_tokens": 689,
+              "completion_tokens": 438,
+              "completion_tokens_details": {
+                "reasoning_tokens": 430
+              }
+            }
+          },
+          {
+            "id": 8357,
+            "letter": "F",
+            "gold": "F",
+            "finish": "stop",
+            "prompt_sha256": "1ec33539bfad4e8acc32bf5b52d496f180ef3efe358d6e105dc9ed05b20e647d",
+            "usage": {
+              "prompt_tokens": 208,
+              "total_tokens": 517,
+              "completion_tokens": 309,
+              "completion_tokens_details": {
+                "reasoning_tokens": 301
+              }
+            }
+          },
+          {
+            "id": 8501,
+            "letter": "E",
+            "gold": "E",
+            "finish": "stop",
+            "prompt_sha256": "99b12539f41c1306b9f4f8524997f8524ace681b9c1f05611f5330a813b229fb",
+            "usage": {
+              "prompt_tokens": 124,
+              "total_tokens": 246,
+              "completion_tokens": 122,
+              "completion_tokens_details": {
+                "reasoning_tokens": 114
+              }
+            }
+          },
+          {
+            "id": 8638,
+            "letter": "C",
+            "gold": "C",
+            "finish": "stop",
+            "prompt_sha256": "ce91a88d1205d21d07f1aa4c470dbea9cb71c31024139a90019fe78b4b62d4cc",
+            "usage": {
+              "prompt_tokens": 242,
+              "total_tokens": 2137,
+              "completion_tokens": 1895,
+              "completion_tokens_details": {
+                "reasoning_tokens": 1887
+              }
+            }
+          },
+          {
+            "id": 8876,
+            "letter": "F",
+            "gold": "E",
+            "finish": "stop",
+            "prompt_sha256": "09f6f4c85b7caa59099dca4b694b8a658fef22b46b2efc873a6274b984a30569",
+            "usage": {
+              "prompt_tokens": 140,
+              "total_tokens": 327,
+              "completion_tokens": 187,
+              "completion_tokens_details": {
+                "reasoning_tokens": 179
+              }
+            }
+          },
+          {
+            "id": 11024,
+            "letter": null,
+            "gold": "B",
+            "finish": "length",
+            "prompt_sha256": "c4bcfa76f66684fc61587ca58ec82f7ec96d6fa902ad2796cabeb8cc6d833115",
+            "usage": {
+              "prompt_tokens": 178,
+              "total_tokens": 2226,
+              "completion_tokens": 2048,
+              "completion_tokens_details": {
+                "reasoning_tokens": 2046
+              }
+            }
+          },
+          {
+            "id": 11261,
+            "letter": "I",
+            "gold": "I",
+            "finish": "stop",
+            "prompt_sha256": "c13f99af6a8b32a92647dab382668208c5fa933aa56ba229021d014763f81da0",
+            "usage": {
+              "prompt_tokens": 214,
+              "total_tokens": 507,
+              "completion_tokens": 293,
+              "completion_tokens_details": {
+                "reasoning_tokens": 285
+              }
+            }
+          },
+          {
+            "id": 10776,
+            "letter": "I",
+            "gold": "I",
+            "finish": "stop",
+            "prompt_sha256": "87b6a9678ad90e20afbfc01cf809e819a034139426a9dfc2fc20802567fa0449",
+            "usage": {
+              "prompt_tokens": 153,
+              "total_tokens": 611,
+              "completion_tokens": 458,
+              "completion_tokens_details": {
+                "reasoning_tokens": 450
+              }
+            }
+          },
+          {
+            "id": 11185,
+            "letter": "B",
+            "gold": "J",
+            "finish": "stop",
+            "prompt_sha256": "e5ee4dfef88953207752fd25fe53fca0e1da86f32b69fc6f5c27f0f075bf3d08",
+            "usage": {
+              "prompt_tokens": 143,
+              "total_tokens": 537,
+              "completion_tokens": 394,
+              "completion_tokens_details": {
+                "reasoning_tokens": 386
+              }
+            }
+          },
+          {
+            "id": 2677,
+            "letter": "H",
+            "gold": "H",
+            "finish": "stop",
+            "prompt_sha256": "d0f3c4b8bd79989678c8ffa41b17ba47a67ab86eb1c665f8320ddf05ecdf24fc",
+            "usage": {
+              "prompt_tokens": 319,
+              "total_tokens": 595,
+              "completion_tokens": 276,
+              "completion_tokens_details": {
+                "reasoning_tokens": 268
+              }
+            }
+          },
+          {
+            "id": 2785,
+            "letter": "E",
+            "gold": "E",
+            "finish": "stop",
+            "prompt_sha256": "3d1f089877b54e78dbe98b3629627628071f70a66ca378ffeecd6c5a43bc8798",
+            "usage": {
+              "prompt_tokens": 272,
+              "total_tokens": 444,
+              "completion_tokens": 172,
+              "completion_tokens_details": {
+                "reasoning_tokens": 164
+              }
+            }
+          },
+          {
+            "id": 2327,
+            "letter": "E",
+            "gold": "E",
+            "finish": "stop",
+            "prompt_sha256": "6140d2fbea7743f2a06b8356fb0c1bcb61688e17f84dbb4eb6f298f032325437",
+            "usage": {
+              "prompt_tokens": 261,
+              "total_tokens": 409,
+              "completion_tokens": 148,
+              "completion_tokens_details": {
+                "reasoning_tokens": 140
+              }
+            }
+          },
+          {
+            "id": 2446,
+            "letter": "E",
+            "gold": "D",
+            "finish": "stop",
+            "prompt_sha256": "9cb423c537b612fdb4387e7e3b4c7abdb3407b8b666f8f38a0c6c282451467a4",
+            "usage": {
+              "prompt_tokens": 110,
+              "total_tokens": 300,
+              "completion_tokens": 190,
+              "completion_tokens_details": {
+                "reasoning_tokens": 182
+              }
+            }
+          }
+        ]
       }
     }
-  }
+  },
+  "method": {
+    "short_tasks": "Same request hashes as 220 W. One warmup plus three trials per mode. Output includes reasoning. Chart image is warm; fresh text-prefix cache salts. Bounded prose caps thinking at 256 tokens.",
+    "coding": "One tests-first generation per mode, raw and extracted submissions graded in isolation. With DSpark the generated source matches the 220 W passing output by SHA-256. With drafting off this generation had an unmatched closing parenthesis and failed to execute.",
+    "agentx": "One serial pass of five fixed-output requests per cache condition and mode. Request hashes, lengths and cached-token counts cross-checked against the release replay.",
+    "guide": "One cold, intact LongBench v2 user-guide question per mode, identical prompt hash. TTFT includes request overhead.",
+    "accuracy": "Same 24 MMLU-Pro questions, seed, temperature, reasoning effort and output cap as the upstream comparison."
+  },
+  "telemetry": {
+    "sample_interval_s": 2,
+    "samples_at_cap": 530,
+    "peak_core_C": 73.0,
+    "peak_power_W": 349.93,
+    "software_thermal_flag_samples": 4,
+    "hardware_thermal_flag_samples": 0
+  },
+  "kernel_checks": [
+    "E4M3 encode/decode verified",
+    "48 routed batches verified"
+  ]
 }
