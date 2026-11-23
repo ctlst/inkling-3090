@@ -46,6 +46,12 @@ docker run --rm --gpus all --entrypoint python3 \
   -v "$PWD/checks:/checks:ro" inkling-3090:rc-local /checks/kernels.py
 ```
 
+## Release benchmarks at 220 W and 350 W
+
+![Single RTX 3090 running official Inkling 2 Mini. Decode rates at 220 W and 350 W respectively: tests-first coding 233 and 258, structured tool call 180 and 201, chat 146 and 163, chart reading 140 and 157, bounded writing 120 and 134 tokens/s.](assets/inkling-3090-release.png)
+
+The 350 W results use the public tag built on the same GPU, with the same official weights, FP8 target KV and seven greedy draft proposals. The coding result is one checked generation at each power cap. The other rows are per-prompt medians across three trials after warmup; the chart image is cached and the announcement has a 256-token thinking budget. The older two-hour OMP result includes retries and reasoning. The 150.1 tok/s figure divides all output tokens by total session time. [350 W benchmark records](benchmarks/official-350w.json) · [Download the release card](https://github.com/ctlst/inkling-3090/releases/download/v0.1.0-rc.1/inkling-3090-release.png)
+
 ## Measurements on the reference deployment
 
 | Two-hour OMP workload | Result |
