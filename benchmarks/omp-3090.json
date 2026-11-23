@@ -1,0 +1,52 @@
+{
+  "start": 1795393974,
+  "end": 1795401162.659026,
+  "wall_minutes": 119.81098376512527,
+  "attempts": 57,
+  "usable_html": 54,
+  "status": {
+    "Passed": 24,
+    "Incomplete": 3,
+    "Checks failed": 23,
+    "Passed after app repair": 7
+  },
+  "generation_turns": 274,
+  "output_tokens": 1079250,
+  "decode_tps": 171.9080056100637,
+  "app_decode_tps": 175.90498466970894,
+  "test_generation_tps": 155.29027962287546,
+  "test_generation_attempts": 166,
+  "test_attempts_passed": 64,
+  "test_attempts_executed": 165,
+  "test_execution_median_s": 0.7695401669479907,
+  "session_output_tps": 150.13231203628447,
+  "median_test_generation_seconds": 9.993979930877686,
+  "median_test_ttft_seconds": 2.4926329851150513,
+  "telemetry": {
+    "samples": 7188,
+    "mean_w": 330.2852838063439,
+    "mean_util": 92.48381601362863,
+    "util_samples": 7044,
+    "max_core": 70.0,
+    "max_hotspot": 82.2,
+    "max_memory": 100.0,
+    "cap_samples": {
+      "350.0": 7044,
+      "220.0": 144
+    },
+    "thermal_us": 0,
+    "thermal_flag_samples": 35,
+    "flagged_memory_range_c": [
+      80.0,
+      86.0
+    ],
+    "flagged_power_range_w": [
+      138.41,
+      258.52
+    ],
+    "flagged_at_peak_memory_samples": 0
+  },
+  "util_ge_90_pct": 92.09256104486087,
+  "median_active_w": 348.88,
+  "time_at_cap_pct": 97.9966611018364
+}

@@ -1,0 +1,6 @@
+Inkling 2 Mini on RTX 3090
+Copyright 2026 ctlst and contributors
+
+This source distribution includes an RTX 3090 patch for vLLM.
+vLLM is copyright its contributors and is licensed under Apache License 2.0.
+The underlying vLLM image and Thinking Machines checkpoint are downloaded separately.

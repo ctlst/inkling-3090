@@ -1,0 +1,13 @@
+.verify/
+.env
+weights/
+.cache/
+__pycache__/
+*.safetensors
+
+# Claude Code
+.claude/
+CLAUDE.md
+CLAUDE.local.md
+.mcp.json
+HANDOFF.md

@@ -1,0 +1,844 @@
+{
+  "hardware": "RTX 3090, reference host measured at 220 W",
+  "image": "sha256:75e8af0098f637d53170577f7ed73ce1e127c9e9e37ab3cd4f24b04d52eb96e2",
+  "method": "One fixture per use case; one warmup and three timed trials per fixture per mode. Off then DSpark 7; serial, greedy, cold text-prefix cache salts, warm runtime. Measured decode includes reasoning tokens. Image input repeated after warmup. Bounded prose repeated the same writing prompt in a second paired run with thinking_token_budget=256 after the original no-draft output hit its limit.",
+  "summary": {
+    "chat": {
+      "off": {
+        "input": 92,
+        "output": 118,
+        "ttft_s": 0.061815007000404876,
+        "wall_s": 1.3662346210003307,
+        "decode_tps": 89.70032350126733,
+        "passed": 3,
+        "accepted_pct": null
+      },
+      "on": {
+        "input": 92,
+        "output": 118,
+        "ttft_s": 0.07854297599988058,
+        "wall_s": 0.8830489910033066,
+        "decode_tps": 145.8239181871101,
+        "passed": 3,
+        "accepted_pct": 35.714285714285715
+      },
+      "wall_speedup": 1.547178735177576
+    },
+    "prose": {
+      "off": {
+        "input": 110,
+        "output": 1024,
+        "ttft_s": 0.07284973199784872,
+        "wall_s": 11.508260390000942,
+        "decode_tps": 89.45935369194018,
+        "passed": 0,
+        "accepted_pct": null
+      },
+      "on": {
+        "input": 110,
+        "output": 912,
+        "ttft_s": 0.0887186619984277,
+        "wall_s": 7.620366855997418,
+        "decode_tps": 120.95774256117367,
+        "passed": 3,
+        "accepted_pct": 26.729559748427672
+      },
+      "wall_speedup": 1.5101976856853887
+    },
+    "tool": {
+      "off": {
+        "input": 159,
+        "output": 118,
+        "ttft_s": 0.0788100560021121,
+        "wall_s": 1.3849697259975073,
+        "decode_tps": 89.57144802500257,
+        "passed": 3,
+        "accepted_pct": null
+      },
+      "on": {
+        "input": 159,
+        "output": 133,
+        "ttft_s": 0.09301128299921402,
+        "wall_s": 0.8259367789978569,
+        "decode_tps": 180.14938511103722,
+        "passed": 3,
+        "accepted_pct": 49.04761904761905
+      },
+      "wall_speedup": 1.6768471403803427
+    },
+    "vision": {
+      "off": {
+        "input": 74,
+        "output": 124,
+        "ttft_s": 0.054208559999096906,
+        "wall_s": 1.4299690430016199,
+        "decode_tps": 89.40330812597033,
+        "passed": 3,
+        "accepted_pct": null
+      },
+      "on": {
+        "input": 74,
+        "output": 124,
+        "ttft_s": 0.07273661199724302,
+        "wall_s": 0.950204152999504,
+        "decode_tps": 140.30344002165046,
+        "passed": 3,
+        "accepted_pct": 32.70676691729323
+      },
+      "wall_speedup": 1.5049071701987882
+    },
+    "bounded_prose": {
+      "off": {
+        "input": 110,
+        "output": 417,
+        "ttft_s": 0.07242679900082294,
+        "wall_s": 4.729801754998334,
+        "decode_tps": 89.38176814808699,
+        "passed": 0,
+        "accepted_pct": null
+      },
+      "on": {
+        "input": 110,
+        "output": 417,
+        "ttft_s": 0.08208141599970986,
+        "wall_s": 3.5496385600017675,
+        "decode_tps": 119.95277695616836,
+        "passed": 3,
+        "accepted_pct": 27.182539682539684
+      },
+      "wall_speedup": 1.332474187173575
+    }
+  },
+  "runs": {
+    "off": [
+      {
+        "trial": 1,
+        "case": "chat",
+        "request_sha256": "78177b90331021242425ca9a7e05aa2a95eea764c45dc3bf63823989bc9a183d",
+        "input": 92,
+        "output": 118,
+        "ttft_s": 0.06077290599932894,
+        "wall_s": 1.3608293090001098,
+        "decode_tps": 89.99953636406362,
+        "accepted": 0,
+        "proposed": 0,
+        "prefix_hits": 0,
+        "answer": "Book Room B, and you\u2019ll have 3 empty seats.",
+        "calls": [],
+        "checks": {
+          "room B": true,
+          "three seats": true,
+          "completed": true
+        },
+        "passed": true
+      },
+      {
+        "trial": 1,
+        "case": "prose",
+        "request_sha256": "70aabff8c117e60c964bf562eda71fe734f022bd67ce8620fd0ad59df137bd41",
+        "input": 110,
+        "output": 1024,
+        "ttft_s": 0.07083270700240973,
+        "wall_s": 11.470139891000144,
+        "decode_tps": 89.74298620924326,
+        "accepted": 0,
+        "proposed": 0,
+        "prefix_hits": 0,
+        "answer": "",
+        "calls": [],
+        "checks": {
+          "length": false,
+          "branch": false,
+          "roof": false,
+          "June 12": false,
+          "July 3": false,
+          "book drop": false,
+          "children's room": false,
+          "hours": false,
+          "completed": false
+        },
+        "passed": false
+      },
+      {
+        "trial": 1,
+        "case": "tool",
+        "request_sha256": "5b031684c0248300f54fefb42f674790efe2d773a3953623432961487691e27a",
+        "input": 159,
+        "output": 118,
+        "ttft_s": 0.0788100560021121,
+        "wall_s": 1.3809138979995623,
+        "decode_tps": 89.85964787045309,
+        "accepted": 0,
+        "proposed": 0,
+        "prefix_hits": 0,
+        "answer": "",
+        "calls": [
+          {
+            "name": "find_departures",
+            "arguments": "{\"after\":\"14:30\",\"destination\":\"Ashford\",\"origin\":\"Dover\"}"
+          }
+        ],
+        "checks": {
+          "function": true,
+          "arguments": true,
+          "completed": true
+        },
+        "passed": true
+      },
+      {
+        "trial": 1,
+        "case": "vision",
+        "request_sha256": "45eb47388777b2968bb8e89a82653c2d65c783a77798eccbe4c746aa7329627e",
+        "input": 74,
+        "output": 124,
+        "ttft_s": 0.057113931001367746,
+        "wall_s": 1.4243427040019014,
+        "decode_tps": 89.96582680977669,
+        "accepted": 0,
+        "proposed": 0,
+        "prefix_hits": 0,
+        "answer": "blue, red, green",
+        "calls": [],
+        "checks": {
+          "bar order": true,
+          "completed": true
+        },
+        "passed": true
+      },
+      {
+        "trial": 2,
+        "case": "chat",
+        "request_sha256": "78177b90331021242425ca9a7e05aa2a95eea764c45dc3bf63823989bc9a183d",
+        "input": 92,
+        "output": 118,
+        "ttft_s": 0.061815007000404876,
+        "wall_s": 1.3662346210003307,
+        "decode_tps": 89.70032350126733,
+        "accepted": 0,
+        "proposed": 0,
+        "prefix_hits": 0,
+        "answer": "Book Room B, and you\u2019ll have 3 empty seats.",
+        "calls": [],
+        "checks": {
+          "room B": true,
+          "three seats": true,
+          "completed": true
+        },
+        "passed": true
+      },
+      {
+        "trial": 2,
+        "case": "prose",
+        "request_sha256": "70aabff8c117e60c964bf562eda71fe734f022bd67ce8620fd0ad59df137bd41",
+        "input": 110,
+        "output": 1024,
+        "ttft_s": 0.07284973199784872,
+        "wall_s": 11.508260390000942,
+        "decode_tps": 89.45935369194018,
+        "accepted": 0,
+        "proposed": 0,
+        "prefix_hits": 0,
+        "answer": "",
+        "calls": [],
+        "checks": {
+          "length": false,
+          "branch": false,
+          "roof": false,
+          "June 12": false,
+          "July 3": false,
+          "book drop": false,
+          "children's room": false,
+          "hours": false,
+          "completed": false
+        },
+        "passed": false
+      },
+      {
+        "trial": 2,
+        "case": "tool",
+        "request_sha256": "5b031684c0248300f54fefb42f674790efe2d773a3953623432961487691e27a",
+        "input": 159,
+        "output": 118,
+        "ttft_s": 0.07869850899805897,
+        "wall_s": 1.3849697259975073,
+        "decode_tps": 89.57144802500257,
+        "accepted": 0,
+        "proposed": 0,
+        "prefix_hits": 0,
+        "answer": "",
+        "calls": [
+          {
+            "name": "find_departures",
+            "arguments": "{\"after\":\"14:30\",\"destination\":\"Ashford\",\"origin\":\"Dover\"}"
+          }
+        ],
+        "checks": {
+          "function": true,
+          "arguments": true,
+          "completed": true
+        },
+        "passed": true
+      },
+      {
+        "trial": 2,
+        "case": "vision",
+        "request_sha256": "45eb47388777b2968bb8e89a82653c2d65c783a77798eccbe4c746aa7329627e",
+        "input": 74,
+        "output": 124,
+        "ttft_s": 0.0541090990009252,
+        "wall_s": 1.4299690430016199,
+        "decode_tps": 89.40330812597033,
+        "accepted": 0,
+        "proposed": 0,
+        "prefix_hits": 0,
+        "answer": "blue, red, green",
+        "calls": [],
+        "checks": {
+          "bar order": true,
+          "completed": true
+        },
+        "passed": true
+      },
+      {
+        "trial": 3,
+        "case": "chat",
+        "request_sha256": "78177b90331021242425ca9a7e05aa2a95eea764c45dc3bf63823989bc9a183d",
+        "input": 92,
+        "output": 118,
+        "ttft_s": 0.06408315599765046,
+        "wall_s": 1.372357442000066,
+        "decode_tps": 89.43628625230139,
+        "accepted": 0,
+        "proposed": 0,
+        "prefix_hits": 0,
+        "answer": "Book Room B, and you\u2019ll have 3 empty seats.",
+        "calls": [],
+        "checks": {
+          "room B": true,
+          "three seats": true,
+          "completed": true
+        },
+        "passed": true
+      },
+      {
+        "trial": 3,
+        "case": "prose",
+        "request_sha256": "70aabff8c117e60c964bf562eda71fe734f022bd67ce8620fd0ad59df137bd41",
+        "input": 110,
+        "output": 1024,
+        "ttft_s": 0.07610330100214924,
+        "wall_s": 11.541776426001888,
+        "decode_tps": 89.22312432940669,
+        "accepted": 0,
+        "proposed": 0,
+        "prefix_hits": 0,
+        "answer": "",
+        "calls": [],
+        "checks": {
+          "length": false,
+          "branch": false,
+          "roof": false,
+          "June 12": false,
+          "July 3": false,
+          "book drop": false,
+          "children's room": false,
+          "hours": false,
+          "completed": false
+        },
+        "passed": false
+      },
+      {
+        "trial": 3,
+        "case": "tool",
+        "request_sha256": "5b031684c0248300f54fefb42f674790efe2d773a3953623432961487691e27a",
+        "input": 159,
+        "output": 118,
+        "ttft_s": 0.08198627000092529,
+        "wall_s": 1.390642303002096,
+        "decode_tps": 89.41701591318447,
+        "accepted": 0,
+        "proposed": 0,
+        "prefix_hits": 0,
+        "answer": "",
+        "calls": [
+          {
+            "name": "find_departures",
+            "arguments": "{\"after\":\"14:30\",\"destination\":\"Ashford\",\"origin\":\"Dover\"}"
+          }
+        ],
+        "checks": {
+          "function": true,
+          "arguments": true,
+          "completed": true
+        },
+        "passed": true
+      },
+      {
+        "trial": 3,
+        "case": "vision",
+        "request_sha256": "45eb47388777b2968bb8e89a82653c2d65c783a77798eccbe4c746aa7329627e",
+        "input": 74,
+        "output": 124,
+        "ttft_s": 0.054208559999096906,
+        "wall_s": 1.4337042229999497,
+        "decode_tps": 89.17034458567721,
+        "accepted": 0,
+        "proposed": 0,
+        "prefix_hits": 0,
+        "answer": "blue, red, green",
+        "calls": [],
+        "checks": {
+          "bar order": true,
+          "completed": true
+        },
+        "passed": true
+      },
+      {
+        "trial": 1,
+        "case": "bounded_prose",
+        "request_sha256": "b2759903c2264e211388056f94eaadf483621d945c0aa735debb4fde9929aff0",
+        "input": 110,
+        "output": 417,
+        "ttft_s": 0.08333871599825216,
+        "wall_s": 4.734829871998954,
+        "decode_tps": 89.43539608799709,
+        "accepted": 0,
+        "proposed": 0,
+        "prefix_hits": 0,
+        "answer": "The North Branch library will reopen on June 12. Weekday hours will be 9 am to 6 pm. The book drop on Cedar Street will remain available and is not affected by the closure. The children\u2019s room will not reopen on June 12; it will reopen separately on July 3. Until July 3, the main library is available, but the children\u2019s room should be treated as closed. Members should plan visits accordingly: use the North Branch for general materials and services from June 12, and check back before July 3 if a children\u2019s room visit is needed. No new services are being added at this time. If you have questions about a specific space, contact the library before your visit.",
+        "calls": [],
+        "checks": {
+          "length": true,
+          "branch": true,
+          "roof": false,
+          "June 12": true,
+          "July 3": true,
+          "book drop": true,
+          "children's room": true,
+          "hours": true,
+          "completed": true
+        },
+        "passed": false
+      },
+      {
+        "trial": 2,
+        "case": "bounded_prose",
+        "request_sha256": "b2759903c2264e211388056f94eaadf483621d945c0aa735debb4fde9929aff0",
+        "input": 110,
+        "output": 417,
+        "ttft_s": 0.06640442999923835,
+        "wall_s": 4.720635664998554,
+        "decode_tps": 89.38176814808699,
+        "accepted": 0,
+        "proposed": 0,
+        "prefix_hits": 0,
+        "answer": "The North Branch library will reopen on June 12. Weekday hours will be 9 am to 6 pm. The book drop on Cedar Street will remain available and is not affected by the closure. The children\u2019s room will not reopen on June 12; it will reopen separately on July 3. Until July 3, the main library is available, but the children\u2019s room should be treated as closed. Members should plan visits accordingly: use the North Branch for general materials and services from June 12, and check back before July 3 if a children\u2019s room visit is needed. No new services are being added at this time. If you have questions about a specific space, contact the library before your visit.",
+        "calls": [],
+        "checks": {
+          "length": true,
+          "branch": true,
+          "roof": false,
+          "June 12": true,
+          "July 3": true,
+          "book drop": true,
+          "children's room": true,
+          "hours": true,
+          "completed": true
+        },
+        "passed": false
+      },
+      {
+        "trial": 3,
+        "case": "bounded_prose",
+        "request_sha256": "b2759903c2264e211388056f94eaadf483621d945c0aa735debb4fde9929aff0",
+        "input": 110,
+        "output": 417,
+        "ttft_s": 0.07242679900082294,
+        "wall_s": 4.729801754998334,
+        "decode_tps": 89.32166272753071,
+        "accepted": 0,
+        "proposed": 0,
+        "prefix_hits": 0,
+        "answer": "The North Branch library will reopen on June 12. Weekday hours will be 9 am to 6 pm. The book drop on Cedar Street will remain available and is not affected by the closure. The children\u2019s room will not reopen on June 12; it will reopen separately on July 3. Until July 3, the main library is available, but the children\u2019s room should be treated as closed. Members should plan visits accordingly: use the North Branch for general materials and services from June 12, and check back before July 3 if a children\u2019s room visit is needed. No new services are being added at this time. If you have questions about a specific space, contact the library before your visit.",
+        "calls": [],
+        "checks": {
+          "length": true,
+          "branch": true,
+          "roof": false,
+          "June 12": true,
+          "July 3": true,
+          "book drop": true,
+          "children's room": true,
+          "hours": true,
+          "completed": true
+        },
+        "passed": false
+      }
+    ],
+    "on": [
+      {
+        "trial": 1,
+        "case": "chat",
+        "request_sha256": "78177b90331021242425ca9a7e05aa2a95eea764c45dc3bf63823989bc9a183d",
+        "input": 92,
+        "output": 118,
+        "ttft_s": 0.07805173000087962,
+        "wall_s": 0.8785436799989839,
+        "decode_tps": 146.17635744780426,
+        "accepted": 85,
+        "proposed": 238,
+        "prefix_hits": 0,
+        "answer": "Book Room B, and you\u2019ll have 3 empty seats.",
+        "calls": [],
+        "checks": {
+          "room B": true,
+          "three seats": true,
+          "completed": true
+        },
+        "passed": true
+      },
+      {
+        "trial": 1,
+        "case": "prose",
+        "request_sha256": "70aabff8c117e60c964bf562eda71fe734f022bd67ce8620fd0ad59df137bd41",
+        "input": 110,
+        "output": 912,
+        "ttft_s": 0.09105554299821961,
+        "wall_s": 7.620366855997418,
+        "decode_tps": 120.99577869911634,
+        "accepted": 595,
+        "proposed": 2226,
+        "prefix_hits": 0,
+        "answer": "The North Branch library will reopen on June 12 after a roof repair. On June 12, the main branch will be open weekdays from 9 am to 6 pm. The book drop will remain on Cedar Street. The children's room will not be part of the June 12 reopening; it will reopen separately on July 3. Until July 3, library members should plan to use the main branch and the Cedar Street book drop, and should not expect the children's room to be available. After July 3, the children's room will be open as part of the branch, though the notes do not describe any additional services beyond the reopening dates and hours. Please check the library's posted schedule for any updates before visiting.",
+        "calls": [],
+        "checks": {
+          "length": true,
+          "branch": true,
+          "roof": true,
+          "June 12": true,
+          "July 3": true,
+          "book drop": true,
+          "children's room": true,
+          "hours": true,
+          "completed": true
+        },
+        "passed": true
+      },
+      {
+        "trial": 1,
+        "case": "tool",
+        "request_sha256": "5b031684c0248300f54fefb42f674790efe2d773a3953623432961487691e27a",
+        "input": 159,
+        "output": 133,
+        "ttft_s": 0.09218663799765636,
+        "wall_s": 0.8275353889985126,
+        "decode_tps": 179.51781579940354,
+        "accepted": 103,
+        "proposed": 210,
+        "prefix_hits": 0,
+        "answer": "",
+        "calls": [
+          {
+            "name": "find_departures",
+            "arguments": "{\"after\":\"14:30\",\"destination\":\"Ashford\",\"origin\":\"Dover\"}"
+          }
+        ],
+        "checks": {
+          "function": true,
+          "arguments": true,
+          "completed": true
+        },
+        "passed": true
+      },
+      {
+        "trial": 1,
+        "case": "vision",
+        "request_sha256": "45eb47388777b2968bb8e89a82653c2d65c783a77798eccbe4c746aa7329627e",
+        "input": 74,
+        "output": 124,
+        "ttft_s": 0.07273661199724302,
+        "wall_s": 0.9511445809985162,
+        "decode_tps": 140.03437752879657,
+        "accepted": 87,
+        "proposed": 266,
+        "prefix_hits": 0,
+        "answer": "blue, red, green",
+        "calls": [],
+        "checks": {
+          "bar order": true,
+          "completed": true
+        },
+        "passed": true
+      },
+      {
+        "trial": 2,
+        "case": "chat",
+        "request_sha256": "78177b90331021242425ca9a7e05aa2a95eea764c45dc3bf63823989bc9a183d",
+        "input": 92,
+        "output": 118,
+        "ttft_s": 0.07854297599988058,
+        "wall_s": 0.883761103003053,
+        "decode_tps": 145.316114004324,
+        "accepted": 85,
+        "proposed": 238,
+        "prefix_hits": 0,
+        "answer": "Book Room B, and you\u2019ll have 3 empty seats.",
+        "calls": [],
+        "checks": {
+          "room B": true,
+          "three seats": true,
+          "completed": true
+        },
+        "passed": true
+      },
+      {
+        "trial": 2,
+        "case": "prose",
+        "request_sha256": "70aabff8c117e60c964bf562eda71fe734f022bd67ce8620fd0ad59df137bd41",
+        "input": 110,
+        "output": 912,
+        "ttft_s": 0.0887186619984277,
+        "wall_s": 7.6383285020019684,
+        "decode_tps": 120.6698497325669,
+        "accepted": 595,
+        "proposed": 2226,
+        "prefix_hits": 0,
+        "answer": "The North Branch library will reopen on June 12 after a roof repair. On June 12, the main branch will be open weekdays from 9 am to 6 pm. The book drop will remain on Cedar Street. The children's room will not be part of the June 12 reopening; it will reopen separately on July 3. Until July 3, library members should plan to use the main branch and the Cedar Street book drop, and should not expect the children's room to be available. After July 3, the children's room will be open as part of the branch, though the notes do not describe any additional services beyond the reopening dates and hours. Please check the library's posted schedule for any updates before visiting.",
+        "calls": [],
+        "checks": {
+          "length": true,
+          "branch": true,
+          "roof": true,
+          "June 12": true,
+          "July 3": true,
+          "book drop": true,
+          "children's room": true,
+          "hours": true,
+          "completed": true
+        },
+        "passed": true
+      },
+      {
+        "trial": 2,
+        "case": "tool",
+        "request_sha256": "5b031684c0248300f54fefb42f674790efe2d773a3953623432961487691e27a",
+        "input": 159,
+        "output": 133,
+        "ttft_s": 0.09301128299921402,
+        "wall_s": 0.8254916299993056,
+        "decode_tps": 180.22431988590307,
+        "accepted": 103,
+        "proposed": 210,
+        "prefix_hits": 0,
+        "answer": "",
+        "calls": [
+          {
+            "name": "find_departures",
+            "arguments": "{\"after\":\"14:30\",\"destination\":\"Ashford\",\"origin\":\"Dover\"}"
+          }
+        ],
+        "checks": {
+          "function": true,
+          "arguments": true,
+          "completed": true
+        },
+        "passed": true
+      },
+      {
+        "trial": 2,
+        "case": "vision",
+        "request_sha256": "45eb47388777b2968bb8e89a82653c2d65c783a77798eccbe4c746aa7329627e",
+        "input": 74,
+        "output": 124,
+        "ttft_s": 0.07267468300051405,
+        "wall_s": 0.94771965900145,
+        "decode_tps": 140.571710999867,
+        "accepted": 87,
+        "proposed": 266,
+        "prefix_hits": 0,
+        "answer": "blue, red, green",
+        "calls": [],
+        "checks": {
+          "bar order": true,
+          "completed": true
+        },
+        "passed": true
+      },
+      {
+        "trial": 3,
+        "case": "chat",
+        "request_sha256": "78177b90331021242425ca9a7e05aa2a95eea764c45dc3bf63823989bc9a183d",
+        "input": 92,
+        "output": 118,
+        "ttft_s": 0.08060539500002051,
+        "wall_s": 0.8830489910033066,
+        "decode_tps": 145.8239181871101,
+        "accepted": 85,
+        "proposed": 238,
+        "prefix_hits": 0,
+        "answer": "Book Room B, and you\u2019ll have 3 empty seats.",
+        "calls": [],
+        "checks": {
+          "room B": true,
+          "three seats": true,
+          "completed": true
+        },
+        "passed": true
+      },
+      {
+        "trial": 3,
+        "case": "prose",
+        "request_sha256": "70aabff8c117e60c964bf562eda71fe734f022bd67ce8620fd0ad59df137bd41",
+        "input": 110,
+        "output": 912,
+        "ttft_s": 0.08570965300168609,
+        "wall_s": 7.617332114001329,
+        "decode_tps": 120.95774256117367,
+        "accepted": 595,
+        "proposed": 2226,
+        "prefix_hits": 0,
+        "answer": "The North Branch library will reopen on June 12 after a roof repair. On June 12, the main branch will be open weekdays from 9 am to 6 pm. The book drop will remain on Cedar Street. The children's room will not be part of the June 12 reopening; it will reopen separately on July 3. Until July 3, library members should plan to use the main branch and the Cedar Street book drop, and should not expect the children's room to be available. After July 3, the children's room will be open as part of the branch, though the notes do not describe any additional services beyond the reopening dates and hours. Please check the library's posted schedule for any updates before visiting.",
+        "calls": [],
+        "checks": {
+          "length": true,
+          "branch": true,
+          "roof": true,
+          "June 12": true,
+          "July 3": true,
+          "book drop": true,
+          "children's room": true,
+          "hours": true,
+          "completed": true
+        },
+        "passed": true
+      },
+      {
+        "trial": 3,
+        "case": "tool",
+        "request_sha256": "5b031684c0248300f54fefb42f674790efe2d773a3953623432961487691e27a",
+        "input": 159,
+        "output": 133,
+        "ttft_s": 0.09314138499757973,
+        "wall_s": 0.8259367789978569,
+        "decode_tps": 180.14938511103722,
+        "accepted": 103,
+        "proposed": 210,
+        "prefix_hits": 0,
+        "answer": "",
+        "calls": [
+          {
+            "name": "find_departures",
+            "arguments": "{\"after\":\"14:30\",\"destination\":\"Ashford\",\"origin\":\"Dover\"}"
+          }
+        ],
+        "checks": {
+          "function": true,
+          "arguments": true,
+          "completed": true
+        },
+        "passed": true
+      },
+      {
+        "trial": 3,
+        "case": "vision",
+        "request_sha256": "45eb47388777b2968bb8e89a82653c2d65c783a77798eccbe4c746aa7329627e",
+        "input": 74,
+        "output": 124,
+        "ttft_s": 0.07348505499976454,
+        "wall_s": 0.950204152999504,
+        "decode_tps": 140.30344002165046,
+        "accepted": 87,
+        "proposed": 266,
+        "prefix_hits": 0,
+        "answer": "blue, red, green",
+        "calls": [],
+        "checks": {
+          "bar order": true,
+          "completed": true
+        },
+        "passed": true
+      },
+      {
+        "trial": 1,
+        "case": "bounded_prose",
+        "request_sha256": "b2759903c2264e211388056f94eaadf483621d945c0aa735debb4fde9929aff0",
+        "input": 110,
+        "output": 417,
+        "ttft_s": 0.08208141599970986,
+        "wall_s": 3.548618469001667,
+        "decode_tps": 120.0075197866014,
+        "accepted": 274,
+        "proposed": 1008,
+        "prefix_hits": 0,
+        "answer": "The North Branch will reopen on June 12 following a roof repair. On that date, the main branch will be available weekdays from 9 am to 6 pm. The book drop will remain on Cedar Street and is not part of the reopening schedule. The children\u2019s room will not be available on June 12; it will reopen separately on July 3. Members should plan accordingly: use the main branch for weekday visits beginning June 12, continue using the Cedar Street book drop as usual, and wait until July 3 for the children\u2019s room. No other changes to hours, services, or locations are announced. If you have questions about a specific space, check the library\u2019s posted updates before your visit.",
+        "calls": [],
+        "checks": {
+          "length": true,
+          "branch": true,
+          "roof": true,
+          "June 12": true,
+          "July 3": true,
+          "book drop": true,
+          "children's room": true,
+          "hours": true,
+          "completed": true
+        },
+        "passed": true
+      },
+      {
+        "trial": 2,
+        "case": "bounded_prose",
+        "request_sha256": "b2759903c2264e211388056f94eaadf483621d945c0aa735debb4fde9929aff0",
+        "input": 110,
+        "output": 417,
+        "ttft_s": 0.08151707900105976,
+        "wall_s": 3.5496385600017675,
+        "decode_tps": 119.95277695616836,
+        "accepted": 274,
+        "proposed": 1008,
+        "prefix_hits": 0,
+        "answer": "The North Branch will reopen on June 12 following a roof repair. On that date, the main branch will be available weekdays from 9 am to 6 pm. The book drop will remain on Cedar Street and is not part of the reopening schedule. The children\u2019s room will not be available on June 12; it will reopen separately on July 3. Members should plan accordingly: use the main branch for weekday visits beginning June 12, continue using the Cedar Street book drop as usual, and wait until July 3 for the children\u2019s room. No other changes to hours, services, or locations are announced. If you have questions about a specific space, check the library\u2019s posted updates before your visit.",
+        "calls": [],
+        "checks": {
+          "length": true,
+          "branch": true,
+          "roof": true,
+          "June 12": true,
+          "July 3": true,
+          "book drop": true,
+          "children's room": true,
+          "hours": true,
+          "completed": true
+        },
+        "passed": true
+      },
+      {
+        "trial": 3,
+        "case": "bounded_prose",
+        "request_sha256": "b2759903c2264e211388056f94eaadf483621d945c0aa735debb4fde9929aff0",
+        "input": 110,
+        "output": 417,
+        "ttft_s": 0.08251085299707484,
+        "wall_s": 3.553853976998653,
+        "decode_tps": 119.84080049610131,
+        "accepted": 274,
+        "proposed": 1008,
+        "prefix_hits": 0,
+        "answer": "The North Branch will reopen on June 12 following a roof repair. On that date, the main branch will be available weekdays from 9 am to 6 pm. The book drop will remain on Cedar Street and is not part of the reopening schedule. The children\u2019s room will not be available on June 12; it will reopen separately on July 3. Members should plan accordingly: use the main branch for weekday visits beginning June 12, continue using the Cedar Street book drop as usual, and wait until July 3 for the children\u2019s room. No other changes to hours, services, or locations are announced. If you have questions about a specific space, check the library\u2019s posted updates before your visit.",
+        "calls": [],
+        "checks": {
+          "length": true,
+          "branch": true,
+          "roof": true,
+          "June 12": true,
+          "July 3": true,
+          "book drop": true,
+          "children's room": true,
+          "hours": true,
+          "completed": true
+        },
+        "passed": true
+      }
+    ]
+  }
+}

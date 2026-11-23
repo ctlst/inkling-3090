@@ -1,0 +1,240 @@
+{
+  "source_commit": "ede08d3",
+  "candidate_image_id": "sha256:75e8af0098f637d53170577f7ed73ce1e127c9e9e37ab3cd4f24b04d52eb96e2",
+  "boot_start_unix": 1795414663.795782,
+  "health_ready_seconds": 69.29744291305542,
+  "cold_start_scope": "Fresh Compose project, container and runtime cache volumes. Official checkpoint already on local disk. Upstream image includes packaged FlashInfer and pip cache files. The host OS remained up.",
+  "gpu_at_readiness": {
+    "name": "NVIDIA GeForce RTX 3090",
+    "driver_version": "595.58.03",
+    "memory.used [MiB]": "23565 MiB",
+    "memory.total [MiB]": "24576 MiB",
+    "power.limit [W]": "220.00 W"
+  },
+  "startup_to_first_nonstream_chat_response_seconds": 72.15327882766724,
+  "first_chat_seconds_from_model_registry_response": 2.7564568519592285,
+  "model_registry_and_arithmetic": "passed",
+  "vision": {
+    "content": "Red, blue",
+    "finish": "stop"
+  },
+  "tool": {
+    "finish": "tool_calls",
+    "calls": [
+      {
+        "name": "get_gpu_temperature",
+        "arguments_match_fixture": true
+      }
+    ]
+  },
+  "tests_first_coder": {
+    "prompt_tokens": 573,
+    "tokens": 3890,
+    "ttft": 3.9451845420007885,
+    "request_seconds": 20.634357873001136,
+    "decode_tps": 233.02619829473875,
+    "stop": "stop",
+    "sha256": "c0120efb96b64c1c9182a969bab0da637e4f468db1325d111762869468258c14",
+    "raw": {
+      "external": 17,
+      "self": {
+        "exit": 0,
+        "tests": 22,
+        "pass": true
+      },
+      "failures": []
+    },
+    "extracted": {
+      "external": 17,
+      "self": {
+        "exit": 0,
+        "tests": 22,
+        "pass": true
+      },
+      "failures": []
+    }
+  },
+  "agentx": {
+    "cold": {
+      "reference": {
+        "all_five_seconds": 128.04809439182281,
+        "sum_ttft_seconds": 117.72422269172966,
+        "turns_3_to_5_seconds": 96.50543427467346,
+        "long_turns_decode_tps": 121.52580294904362,
+        "cache_hits_tokens": 0
+      },
+      "candidate": {
+        "all_five_seconds": 130.83715271700203,
+        "sum_ttft_seconds": 121.33156076300293,
+        "turns_3_to_5_seconds": 97.73800396300066,
+        "long_turns_decode_tps": 132.15671838439988,
+        "cache_hits_tokens": 0
+      },
+      "candidate_turns": [
+        {
+          "i": 0,
+          "source_sha256": "f5b07e4c174367fa575eda93ffe3d80818302221d72d47b153ecd99821a9b27c",
+          "input": 655,
+          "output": 20,
+          "ttft": 2.1955340660024376,
+          "seconds": 2.3769141840020893,
+          "decode_tps": 104.80159772353554,
+          "hits": 0.0,
+          "queries": 655.0
+        },
+        {
+          "i": 1,
+          "source_sha256": "9a2384753daeb0dcd70fac1fa96b76fb81f0972534408573e15197a43962d8e3",
+          "input": 63714,
+          "output": 395,
+          "ttft": 27.534813392001524,
+          "seconds": 30.722234569999273,
+          "decode_tps": 123.62938750219854,
+          "hits": 0.0,
+          "queries": 63714.0
+        },
+        {
+          "i": 2,
+          "source_sha256": "3443b083ef48cbc289472bd5e74dc2b9c82cfcdeede21fa8e3827af2f663d4cb",
+          "input": 65385,
+          "output": 265,
+          "ttft": 31.212034697997296,
+          "seconds": 33.001558776999445,
+          "decode_tps": 147.55625958275468,
+          "hits": 0.0,
+          "queries": 65385.0
+        },
+        {
+          "i": 3,
+          "source_sha256": "98a092109ee8de2c5579f36b146517def43ea2fce86cbbb7abc4bdbb815704f4",
+          "input": 66861,
+          "output": 257,
+          "ttft": 30.329044160000194,
+          "seconds": 32.86435563499981,
+          "decode_tps": 100.99604082621426,
+          "hits": 0.0,
+          "queries": 66861.0
+        },
+        {
+          "i": 4,
+          "source_sha256": "a1127f1627ac951d4d1a290f5508383342550a931ad50e96818150c1080ab1ec",
+          "input": 67956,
+          "output": 319,
+          "ttft": 30.060134447001474,
+          "seconds": 31.87208955100141,
+          "decode_tps": 175.55288785248035,
+          "hits": 0.0,
+          "queries": 67956.0
+        }
+      ]
+    },
+    "reuse": {
+      "reference": {
+        "all_five_seconds": 43.28416228108108,
+        "sum_ttft_seconds": 31.16453150846064,
+        "turns_3_to_5_seconds": 11.101319015026093,
+        "long_turns_decode_tps": 103.31494868286742,
+        "cache_hits_tokens": 195712
+      },
+      "candidate": {
+        "all_five_seconds": 43.72502592299497,
+        "sum_ttft_seconds": 32.34246672099471,
+        "turns_3_to_5_seconds": 13.369052982998255,
+        "long_turns_decode_tps": 110.0313675457678,
+        "cache_hits_tokens": 195712
+      },
+      "candidate_turns": [
+        {
+          "i": 0,
+          "source_sha256": "f5b07e4c174367fa575eda93ffe3d80818302221d72d47b153ecd99821a9b27c",
+          "input": 655,
+          "output": 20,
+          "ttft": 0.2348046249971958,
+          "seconds": 0.4185527589979756,
+          "decode_tps": 103.43284353087037,
+          "hits": 0.0,
+          "queries": 655.0
+        },
+        {
+          "i": 1,
+          "source_sha256": "9a2384753daeb0dcd70fac1fa96b76fb81f0972534408573e15197a43962d8e3",
+          "input": 63714,
+          "output": 395,
+          "ttft": 26.7106045440014,
+          "seconds": 29.937420180998743,
+          "decode_tps": 122.12169728907031,
+          "hits": 0.0,
+          "queries": 63714.0
+        },
+        {
+          "i": 2,
+          "source_sha256": "3443b083ef48cbc289472bd5e74dc2b9c82cfcdeede21fa8e3827af2f663d4cb",
+          "input": 65385,
+          "output": 265,
+          "ttft": 2.403137445999164,
+          "seconds": 4.333890870999312,
+          "decode_tps": 136.76167075135368,
+          "hits": 63616.0,
+          "queries": 65385.0
+        },
+        {
+          "i": 3,
+          "source_sha256": "98a092109ee8de2c5579f36b146517def43ea2fce86cbbb7abc4bdbb815704f4",
+          "input": 66861,
+          "output": 257,
+          "ttft": 0.9372039309964748,
+          "seconds": 3.2841280009997718,
+          "decode_tps": 109.10452764512802,
+          "hits": 65280.0,
+          "queries": 66861.0
+        },
+        {
+          "i": 4,
+          "source_sha256": "a1127f1627ac951d4d1a290f5508383342550a931ad50e96818150c1080ab1ec",
+          "input": 67956,
+          "output": 319,
+          "ttft": 2.0567161750004743,
+          "seconds": 5.751034110999171,
+          "decode_tps": 86.09071704971774,
+          "hits": 66816.0,
+          "queries": 67956.0
+        }
+      ]
+    }
+  },
+  "near_limit": {
+    "prompt_sha256": "3e970c803f439496aa0d5164de3bcc01ea9513960780efca68aacadc85624cd3",
+    "limit": 196608,
+    "usage": {
+      "prompt_tokens": 195015,
+      "total_tokens": 195511,
+      "completion_tokens": 496,
+      "completion_tokens_details": {
+        "reasoning_tokens": 482
+      }
+    },
+    "gold": "B",
+    "choice": "B",
+    "choice_correct": true,
+    "cached_tokens": 0.0,
+    "first_token_s": 105.3561221279997,
+    "seconds": 110.55440562299918,
+    "prompt_tps": 1851.007763583701,
+    "output_tps": 95.22374077446287,
+    "finish": "stop"
+  },
+  "reference_near_limit": {
+    "choice": "B",
+    "choice_correct": true,
+    "first_token_s": 127.96872423961759,
+    "seconds": 133.25150098465383
+  },
+  "kernel_checks": [
+    "E4M3 encode/decode verified",
+    "48 routed batches verified"
+  ],
+  "restored_model": {
+    "id": "inkling-2-mini",
+    "max_model_len": 196608
+  }
+}

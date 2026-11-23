@@ -1,0 +1,51 @@
+services:
+  inkling:
+    build: .
+    image: inkling-3090:rc-local
+    platform: linux/amd64
+    gpus: all
+    shm_size: 2gb
+    ports:
+      - "127.0.0.1:${PORT:-8000}:8000"
+    environment:
+      HF_HUB_OFFLINE: "1"
+      VLLM_NO_USAGE_STATS: "1"
+      DO_NOT_TRACK: "1"
+    volumes:
+      - type: bind
+        source: ${MODEL_DIR:?Set MODEL_DIR to the downloaded Inkling checkpoint}
+        target: /weights
+        read_only: true
+        bind:
+          create_host_path: false
+      - kernel-cache:/root/.cache
+      - triton-cache:/root/.triton
+    command:
+      - /weights
+      - --served-model-name
+      - inkling-2-mini
+      - --max-model-len
+      - "196608"
+      - --max-num-seqs
+      - "1"
+      - --max-num-batched-tokens
+      - "512"
+      - --gpu-memory-utilization
+      - "0.975"
+      - --reasoning-parser
+      - inkling
+      - --tool-call-parser
+      - inkling
+      - --enable-auto-tool-choice
+      - --kv-cache-dtype
+      - fp8
+      - --kv-cache-memory-bytes
+      - "5100273664"
+      - -cc.mode=none
+      - -cc.cudagraph_mode=FULL_DECODE_ONLY
+      - -cc.decode_cudagraph_capture_request_sizes=[1]
+      - --speculative-config
+      - '{"method":"dspark","num_speculative_tokens":7,"draft_sample_method":"greedy"}'
+volumes:
+  kernel-cache:
+  triton-cache:

@@ -1,0 +1,958 @@
+--- a/nvidia/attention.py
++++ b/nvidia/attention.py
+@@ -9,6 +9,8 @@
+ 
+ import numpy as np
+ import torch
++from .ops.tier_hybrid import hybrid
++from .ops.long_attention import long_attention
+ from torch import nn
+ 
+ from vllm.compilation.breakable_cudagraph import eager_break_during_capture
+@@ -291,7 +293,7 @@
+         self.max_decode_query_len = max_decode_query_len(vllm_config)
+         cache_dtype = vllm_config.cache_config.cache_dtype
+         supported: tuple[str, ...] = ("auto", "bfloat16")
+-        if current_platform.is_device_capability_family(120):
++        if current_platform.is_device_capability(86) or current_platform.is_device_capability_family(120):
+             supported += ("float16", "fp8", "fp8_e4m3")
+         if cache_dtype not in supported:
+             raise ValueError(f"Inkling2 KV cache dtype must be one of {supported}")
+@@ -352,7 +354,7 @@
+     ) -> tuple[torch.Tensor, torch.Tensor]:
+         if self.fp8_kv:
+             # Every loop pass owns byte storage containing unit-scale E4M3 KV.
+-            kv_cache = kv_cache.view(torch.float8_e4m3fn)
++            kv_cache = kv_cache.view(torch.uint8)
+         key_cache, value_cache = kv_cache.transpose(1, 2).split(self.head_dim, dim=-1)
+         return (
+             canonicalize_singleton_dim_strides(key_cache),
+@@ -607,6 +609,27 @@
+         if num_decodes:
+             cu_seqlens_q = cu_seqlens_q - num_decode_tokens
+         key_cache, value_cache = self._split_kv_cache(kv_cache)
++        if (
++            num_decodes == 0
++            and md.seq_lens.shape[0] == 1
++            and 64 <= nt <= 512
++            and key_cache.dtype == torch.uint8
++        ):
++            length = int(md.seq_lens_cpu[0])
++            if not self.is_local and nt == 512 and length >= 65536:
++                hybrid(q[:nt], key_cache, value_cache, out[:nt], lse[:, :nt],
++                    rel_logits, md.block_table, length, self.scaling, cu_seqlens_q, md.seq_lens, 4096, 4)
++            else:
++                long_attention(
++                    q[:nt], key_cache, value_cache, out[:nt], lse[:, :nt],
++                    rel_logits, md.block_table, int(md.seq_lens_cpu[0]), self.scaling,
++                    block_m=32 if self.is_local else 64, block_n=64,
++                    splits=1 if self.is_local else 4, warps=4,
++                    window=self.sliding_window if self.is_local else 0,
++                )
++            out[nt:].zero_()
++            lse[:, nt:].zero_()
++            return
+         if not use_sm100_kernels():
+             rel_attention(
+                 q[:nt],
+--- a/nvidia/dspark.py
++++ b/nvidia/dspark.py
+@@ -188,8 +188,12 @@
+     def _write_kv(
+         self, k: torch.Tensor, v: torch.Tensor, slot_mapping: torch.Tensor
+     ) -> None:
+-        impl = cast(FlashAttentionImpl, self.attn.impl)
+-        impl.do_kv_cache_update(self.attn, k, v, self.attn.kv_cache, slot_mapping)
++        from vllm.v1.attention.ops.triton_reshape_and_cache_flash import triton_reshape_and_cache_flash
++        key_cache, value_cache = self.attn.kv_cache.transpose(1, 2).split(self.head_dim, dim=-1)
++        triton_reshape_and_cache_flash(
++            k, v, key_cache, value_cache, slot_mapping,
++            self.attn.kv_cache_dtype, self.attn._k_scale, self.attn._v_scale,
++        )
+ 
+     def forward(
+         self, positions: torch.Tensor, x: torch.Tensor, cos_sin_cache: torch.Tensor
+--- a/nvidia/model.py
++++ b/nvidia/model.py
+@@ -813,6 +813,27 @@
+             loaded |= {f"visual.{n}" for n in self.visual.load_weights(visual_weights)}
+         if missing := params.keys() - loaded:
+             raise ValueError(f"Missing checkpoint tensors: {sorted(missing)}")
++        from vllm.utils.torch_utils import get_accelerator_view_from_cpu_tensor
++
++        self._pinned_lookup_storage = []
++        modules = [("input_embeddings", self.model.embed_tokens)]
++        if self.visual is not None:
++            modules.append(("vision", self.visual))
++        for name, module in modules:
++            size = 0
++            for param in module.parameters():
++                if not param.is_cuda:
++                    continue
++                host = torch.empty_strided(
++                    param.shape, param.stride(), dtype=param.dtype, device="cpu", pin_memory=True
++                )
++                host.copy_(param.detach())
++                view = get_accelerator_view_from_cpu_tensor(host)
++                assert view.is_cuda and view.stride() == param.stride()
++                self._pinned_lookup_storage.append(host)
++                param.data = view
++                size += host.numel() * host.element_size()
++            print(f"Mapped {name}: {size} bytes of host memory", flush=True)
+         return loaded
+ 
+ 
+--- a/nvidia/ops/activation.py
++++ b/nvidia/ops/activation.py
+@@ -144,7 +144,7 @@
+     # scales are read before waiting for the gate/up GEMM, which launches this
+     # kernel only after its own wait for the routing kernel.
+     if LAUNCH_DEPENDENTS:
+-        tl.extra.cuda.gdc_launch_dependents()
++        pass
+     num_rows = tl.load(NumRows)
+     r = tl.program_id(0)
+     row, gamma, w_amax = _row_inputs(
+@@ -153,7 +153,7 @@
+     denominator = 0.0
+     if NVFP4:
+         denominator = 1536.0 * tl.load(WDenominator)
+-    tl.extra.cuda.gdc_wait()
++    pass
+     start = tl.program_id(1) * (HEAD + TAIL)
+     while r < num_rows:
+         head = _situ(X, row, start, gamma, N, HEAD, GATE_CAP, UP_CAP)
+@@ -273,6 +273,6 @@
+         num_warps=num_warps,
+         maxnreg=maxnreg,
+         enable_fp_fusion=False,
+-        launch_pdl=True,
++        launch_pdl=False,
+     )
+     return values, scales, row_scales
+--- /dev/null
++++ b/nvidia/ops/align_sm86.py
+@@ -0,0 +1,67 @@
++"""SM86 compact expert dispatch, adapted from our Muse kernels competition work for one GPU."""
++import torch
++from .verify_route import pack_verify
++from vllm.triton_utils import tl, triton
++
++@triton.jit
++def _one(Ids, Sorted, Experts, Padded, R:tl.constexpr, BM:tl.constexpr, BW:tl.constexpr):
++    slots=tl.arange(0,R)
++    ids=tl.load(Ids+slots)
++    # Top-k output IDs are unique per token. The dummy/padding row has all -1.
++    valid=ids>=0
++    rank=tl.cumsum(valid.to(tl.int32),0)-1
++    offsets=tl.arange(0,BW)
++    tl.store(Experts+rank,ids,mask=valid)
++    tl.store(Sorted+rank[:,None]*BM+offsets[None,:],tl.where(offsets[None,:]==0,slots[:,None],R),mask=valid[:,None] & (offsets[None,:]<BM))
++    tl.store(Padded,tl.sum(valid.to(tl.int32),0)*BM)
++
++@triton.jit
++def _group(Ids, Buckets, Counts, R:tl.constexpr, BR:tl.constexpr):
++    expert=tl.program_id(0)
++    slots=tl.arange(0,BR)
++    ids=tl.load(Ids+slots,slots<R,other=-1)
++    valid=ids==expert
++    rank=tl.cumsum(valid.to(tl.int32),0)-1
++    tl.store(Buckets+expert*R+rank,slots,mask=valid)
++    tl.store(Counts+expert,tl.sum(valid.to(tl.int32),0))
++
++@triton.jit
++def _pack(Buckets,Counts,Sorted,Experts,Padded,R:tl.constexpr,E:tl.constexpr,BE:tl.constexpr,BM:tl.constexpr, BW:tl.constexpr):
++    tile=tl.program_id(0)
++    es=tl.arange(0,BE)
++    counts=tl.load(Counts+es,es<E,other=0)
++    ends=tl.cumsum(tl.cdiv(counts,BM),0)
++    total=tl.max(ends,0)
++    if tile==0:
++        tl.store(Padded,total*BM)
++    if tile<total:
++        expert=tl.sum((ends<=tile).to(tl.int32),0)
++        begin=tl.max(tl.where(es<expert,ends,0),0)
++        count=tl.sum(tl.where(es==expert,counts,0),0)
++        offset=tl.arange(0,BW)
++        rank=(tile-begin)*BM+offset
++        slots=tl.load(Buckets+expert*R+rank,rank<count,other=R)
++        tl.store(Sorted+tile*BM+offset,slots,offset<BM)
++        tl.store(Experts+tile,expert)
++
++def moe_align_block_size(ids, block_size, num_experts, ignore_invalid_experts=True):
++    assert ignore_invalid_experts and ids.is_contiguous()
++    rows=ids.numel()
++    blocks=min(rows,triton.cdiv(rows+num_experts*(block_size-1),block_size))
++    opts={"dtype":torch.int32,"device":ids.device}
++    sorted_ids=torch.empty(blocks*block_size,**opts)
++    experts=torch.empty(blocks,**opts)
++    padded=torch.empty(1,**opts)
++    if ids.shape[0]==1:
++        _one[(1,)](ids,sorted_ids,experts,padded,rows,block_size,triton.next_power_of_2(block_size))
++    elif ids.shape[0] <= min(8,block_size) and rows <= 64:
++        # Top-k contains distinct experts in every token, so one block holds
++        # every slot for an expert in this batch.
++        pack_verify[(1,)](ids,sorted_ids,experts,padded,rows,num_experts,block_size,
++                          triton.next_power_of_2(rows),triton.next_power_of_2(block_size),num_warps=4)
++    else:
++        buckets=torch.empty((num_experts,rows),**opts)
++        counts=torch.empty(num_experts,**opts)
++        _group[(num_experts,)](ids,buckets,counts,rows,triton.next_power_of_2(rows))
++        _pack[(blocks,)](buckets,counts,sorted_ids,experts,padded,rows,num_experts,triton.next_power_of_2(num_experts),block_size,triton.next_power_of_2(block_size))
++    return sorted_ids,experts,padded
+--- a/nvidia/ops/attention.py
++++ b/nvidia/ops/attention.py
+@@ -285,7 +285,7 @@
+     D: tl.constexpr,
+     BLOCK: tl.constexpr,
+ ):
+-    tl.extra.cuda.gdc_wait()
++    pass
+     row = tl.program_id(0).to(tl.int64)
+     col = tl.program_id(1) * BLOCK + tl.arange(0, BLOCK)
+     mask = col < H * D
+@@ -333,7 +333,7 @@
+         width // num_heads,
+         512,
+         enable_fp_fusion=False,
+-        launch_pdl=True,
++        launch_pdl=False,
+     )
+ 
+ 
+@@ -466,7 +466,7 @@
+         # gate and sink are ready.
+         gate = tl.load(Gate + row * stride_gate + head * D + offs_d).to(tl.float32)
+         sink = tl.load(Sink + row * stride_sink + head).to(tl.float32)
+-    tl.extra.cuda.gdc_wait()
++    pass
+     y_ptrs = Y + row * H * D + head * D + offs_d
+     if row >= num_actual_tokens:
+         tl.store(y_ptrs, tl.zeros([BLOCK_D], tl.float32))
+@@ -1222,6 +1222,8 @@
+     assert key_cache.stride() == value_cache.stride() and key_cache.stride(3) == 1
+     assert q.stride(1) == head_dim and q.stride(2) == 1
+     assert out.is_contiguous()
++    if not draft and window == 0 and cache_seqlens.shape[0] == 1:
++        num_splits = 40
+     # A single split writes the (gated) output itself.
+     fuse_gate = num_splits == 1
+     o_part = q.new_empty(
+@@ -1295,7 +1297,7 @@
+         BLOCK_D=block_d,
+         GATED=not draft,
+         num_warps=num_warps,
+-        launch_pdl=True,
++        launch_pdl=False,
+     )
+ 
+ 
+@@ -1377,5 +1379,5 @@
+         DRAFT=draft,
+         WINDOW=window,
+         num_warps=4,
+-        launch_pdl=True,
+-    )
++        launch_pdl=False,
++    )
+--- a/nvidia/ops/attention_sm90.py
++++ b/nvidia/ops/attention_sm90.py
+@@ -15,6 +15,7 @@
+ """
+ 
+ import torch
++from .long_attention import _expand
+ 
+ from vllm.triton_utils import tl, triton
+ 
+@@ -36,24 +37,8 @@
+ 
+ @triton.jit
+ def _load_fp8_kv(ptr, offsets, mask, dtype: tl.constexpr, D: tl.constexpr):
+-    # Load each E4M3 pair once, retaining 16-bit packing for BF16 MMA order.
+-    half = tl.arange(0, D // 2)
+-    pair = tl.load(
+-        ptr.to(tl.pointer_type(tl.uint16))
+-        + tl.multiple_of(offsets // 2, D // 2)[:, None]
+-        + half[None, :],
+-        mask=mask[:, None],
+-        other=0,
+-    )
+-    lo, hi = tl.inline_asm_elementwise(
+-        "{ .reg .b32 pair; cvt.rn.f16x2.e4m3x2 pair, $2; mov.b32 {$0, $1}, pair; }",
+-        "=h,=h,h",
+-        [pair],
+-        dtype=(tl.float16, tl.float16),
+-        is_pure=True,
+-        pack=1,
+-    )
+-    return tl.interleave(lo, hi).to(dtype)
++    values = tl.load(ptr.to(tl.pointer_type(tl.uint8)) + offsets[:, None] + tl.arange(0, D)[None, :], mask=mask[:, None], other=0)
++    return _expand(values).to(dtype)
+ 
+ 
+ @triton.jit
+@@ -131,7 +116,9 @@
+         n_lo = tl.maximum(pos_lo - (WINDOW - 1), 0) // BLOCK_N
+     n_hi = tl.minimum(pos_hi + 1, seqlen_k)
+     n_hi = (n_hi + BLOCK_N - 1) // BLOCK_N
+-    num_iters = tl.maximum(n_hi - n_lo - split + num_splits - 1, 0) // num_splits
++    width = tl.cdiv(n_hi - n_lo, num_splits)
++    first = n_lo + split * width
++    limit = tl.minimum(first + width, n_hi)
+ 
+     offs_d = tl.arange(0, D)
+     q = tl.load(
+@@ -150,8 +137,7 @@
+     acc = tl.zeros([BLOCK_M, D], tl.float32)
+     block_table = BlockTable + req.to(tl.int64) * stride_bt
+     kv_off = kv_head * stride_kv_h
+-    for i in range(num_iters):
+-        n = n_lo + split + i * num_splits
++    for n in range(first, limit):
+         keys = n * BLOCK_N + tl.arange(0, BLOCK_N)
+         key_valid = keys < seqlen_k
+         page = tl.load(block_table + keys // PAGE, mask=key_valid, other=0)
+@@ -167,15 +153,16 @@
+                 other=0.0,
+             ).to(q.dtype)
+         s = tl.dot(q, k) * qk_scale
+-        dist = pos[:, None] - keys[None, :]
+-        visible = (dist >= 0) & key_valid[None, :]
+-        if WINDOW > 0:
+-            visible &= dist < WINDOW
+-        if not DRAFT:
+-            in_extent = visible & (dist < E) & row_valid[:, None]
+-            bias = tl.load(rel_row[:, None] + keys[None, :], mask=in_extent, other=0.0)
+-            s += bias.to(tl.float32) * LOG2E
+-        s = tl.where(visible, s, float("-inf"))
++        if WINDOW > 0 or (n + 1) * BLOCK_N > pos_lo - E + 1:
++            dist = pos[:, None] - keys[None, :]
++            visible = (dist >= 0) & key_valid[None, :]
++            if WINDOW > 0:
++                visible &= dist < WINDOW
++            if not DRAFT:
++                in_extent = visible & (dist < E) & row_valid[:, None]
++                bias = tl.load(rel_row[:, None] + keys[None, :], mask=in_extent, other=0.0)
++                s += bias.to(tl.float32) * LOG2E
++            s = tl.where(visible, s, float("-inf"))
+         m_new = tl.maximum(m_i, tl.max(s, 1))
+         m_safe = tl.where(m_new == float("-inf"), 0.0, m_new)
+         alpha = tl.exp2(m_i - m_safe)
+--- a/nvidia/ops/attn_res.py
++++ b/nvidia/ops/attn_res.py
+@@ -74,7 +74,7 @@
+     BLOCK_N: tl.constexpr,
+     BLOCK_D: tl.constexpr,
+ ):
+-    tl.extra.cuda.gdc_wait()
++    pass
+     # One program per (token, query).
+     t = tl.program_id(1).to(tl.int64)
+     q_off = tl.program_id(0) * D
+@@ -188,7 +188,7 @@
+     BLOCK_A: tl.constexpr,
+     BLOCK_B: tl.constexpr,
+ ):
+-    tl.extra.cuda.gdc_wait()
++    pass
+     # Small batches: one program per (token, query) holds the row in registers
+     # as a power-of-2 head [0, BLOCK_A) and a masked tail [BLOCK_A, D), so the
+     # sources are read twice instead of three times.
+@@ -291,7 +291,7 @@
+         APPLY_NORM=apply_norm,
+         BLOCK_N=triton.next_power_of_2(num_stack + 1),
+         enable_fp_fusion=False,
+-        launch_pdl=True,
++        launch_pdl=False,
+     )
+     # The queries of a token run back to back and share its sources in L2.
+     grid = (num_q, num_tokens)
+--- a/nvidia/ops/conv_mix.py
++++ b/nvidia/ops/conv_mix.py
+@@ -89,7 +89,7 @@
+     )
+     if sp is None:
+         assert halo == 0 and positions.shape[0] == num_tokens and x.dim() == 2
+-        if current_platform.is_device_capability_family(120):
++        if current_platform.is_device_capability(86) or current_platform.is_device_capability_family(120):
+             # Native conv/mix kernels require Hopper or SM10x. Keep the
+             # loop executor's cache writes and residual rounding on SM12x.
+             short_conv(
+--- /dev/null
++++ b/nvidia/ops/kv_sm86.py
+@@ -0,0 +1,23 @@
++"""Software E4M3FN cache conversion for Ampere, with ties-to-even rounding."""
++from vllm.triton_utils import tl, triton
++
++@triton.jit
++def encode(x):
++    x=x.to(tl.float32)
++    mag=tl.minimum(tl.abs(x),448.0)
++    exp=((mag.to(tl.uint32,bitcast=True)>>23).to(tl.int32)-127)
++    exp=tl.maximum(exp,-6)
++    step=((exp+124)<<23).to(tl.float32,bitcast=True)
++    significand=tl.extra.cuda.libdevice.rint(mag/step).to(tl.int32)
++    code=((exp+6)*8+significand).to(tl.uint32)
++    sign=(x.to(tl.uint32,bitcast=True)>>24)&128
++    return (sign|tl.where(x!=x,127,code)).to(tl.uint8)
++
++@triton.jit
++def decode(bits):
++    bits=bits.to(tl.uint32)
++    mag=bits&127
++    half=((mag<<7)+8192).to(tl.uint16).to(tl.float16,bitcast=True)
++    absolute=tl.where(mag<8,mag.to(tl.float32)*(1./512.),half.to(tl.float32))
++    absolute=tl.where(mag==127,float("nan"),absolute)
++    return tl.where((bits&128)!=0,-absolute,absolute)
+--- a/nvidia/ops/linear.py
++++ b/nvidia/ops/linear.py
+@@ -131,7 +131,7 @@
+ ):
+     if SPLIT and tl.program_id(1) == 0:
+         _prefetch_k_group_tile(W, N, K, BN, tl.program_id(0), tl.program_id(2))
+-    tl.extra.cuda.gdc_wait()
++    pass
+     _k_group_tile(
+         X,
+         W,
+@@ -150,7 +150,7 @@
+ 
+ @triton.jit
+ def _k_group_sum_kernel(Partials, Y, MN, GROUPS: tl.constexpr, BLOCK: tl.constexpr):
+-    tl.extra.cuda.gdc_wait()
++    pass
+     offs = tl.program_id(0) * BLOCK + tl.arange(0, BLOCK)
+     mask = offs < MN
+     total = tl.load(Partials + offs, mask)
+@@ -178,9 +178,9 @@
+     GROUP_TILES: tl.constexpr = 1024 // BK
+     rows = tl.program_id(1) * BM
+     cols = tl.program_id(0) * BN
+-    tl.extra.cuda.gdc_wait()
++    pass
+     if LAUNCH_DEPENDENTS:
+-        tl.extra.cuda.gdc_launch_dependents()
++        pass
+     total = tl.zeros((BM, BN), tl.float32)
+     partial = tl.zeros((BM, BN), tl.float32)
+     for tile in tl.range(TILES, warp_specialize=True):
+@@ -214,7 +214,7 @@
+     tokens, hidden = x.shape
+     n = weight.shape[0]
+     sm120 = current_platform.is_device_capability_family(120)
+-    if tokens >= TMA_MIN_TOKENS and not sm120:
++    if tokens >= TMA_MIN_TOKENS and not sm120 and not current_platform.is_device_capability(86):
+         from triton.tools.tensor_descriptor import TensorDescriptor
+ 
+         out = torch.empty((1, tokens, n), dtype=out_dtype, device=x.device)
+@@ -233,7 +233,7 @@
+             num_warps=4 if block_n == 64 else 8,
+             num_stages=4 if block_n == 64 else 3,
+             enable_fp_fusion=False,
+-            launch_pdl=True,
++            launch_pdl=False,
+         )
+         return out
+     block_m = 16 if tokens <= 128 else 64
+@@ -267,7 +267,7 @@
+         num_warps=num_warps,
+         num_stages=num_stages,
+         enable_fp_fusion=False,
+-        launch_pdl=True,
++        launch_pdl=False,
+     )
+     return out
+ 
+@@ -285,6 +285,6 @@
+         return partials[0]
+     out = torch.empty(partials.shape[1:], dtype=out_dtype, device=x.device)
+     _k_group_sum_kernel[(triton.cdiv(out.numel(), 1024),)](
+-        partials, out, out.numel(), partials.shape[0], 1024, launch_pdl=True
++        partials, out, out.numel(), partials.shape[0], 1024, launch_pdl=False
+     )
+     return out
+--- /dev/null
++++ b/nvidia/ops/long_attention.py
+@@ -0,0 +1,107 @@
++"""SM86 full-attention prefill for a single request with a paged E4M3 cache."""
++import torch
++from vllm.triton_utils import tl, triton
++
++
++@triton.jit
++def _expand(bits):
++    # Position sign/exponent/fraction as FP16 with the E4M3 bias still in place.
++    # Multiplication by 2**8 corrects the bias, including FP8 subnormals.
++    u = bits.to(tl.uint16)
++    half = (((u & 127) << 7) | ((u & 128) << 8)).to(tl.float16, bitcast=True)
++    scaled = half * 256.0
++    return tl.where((u & 127) == 127, float("nan"), scaled).to(tl.bfloat16)
++
++
++@triton.jit
++def _partial(Q, K, V, Rel, Table, Out, LogZ, past, length, scale,
++             qt: tl.constexpr, qh: tl.constexpr, kb: tl.constexpr, ks: tl.constexpr,
++             kh: tl.constexpr, rs: tl.constexpr, rh: tl.constexpr,
++             T: tl.constexpr, H: tl.constexpr, G: tl.constexpr, D: tl.constexpr,
++             PAGE: tl.constexpr, EXTENT: tl.constexpr, S: tl.constexpr,
++             BM: tl.constexpr, BN: tl.constexpr, WINDOW: tl.constexpr,
++             LS: tl.constexpr, LT: tl.constexpr):
++    tile = tl.program_id(0)
++    head = tl.program_id(1)
++    part = tl.program_id(2)
++    t = tile * BM + tl.arange(0, BM)
++    d = tl.arange(0, D)
++    n = tl.arange(0, BN)
++    q = tl.load(Q + t[:, None] * qt + head * qh + d[None, :], t[:, None] < T, 0)
++    pos = past + t
++    shear_end = tl.minimum((t // 128 + 1) * 128, T)
++    rel_base = tl.cdiv(past + shear_end, 128) * 128 - (EXTENT + 256)
++    rel = Rel + t * rs + head * rh - rel_base
++    m = tl.full((BM,), -float("inf"), tl.float32)
++    norm = tl.zeros((BM,), tl.float32)
++    acc = tl.zeros((BM, D), tl.float32)
++    tiles = tl.cdiv(tl.minimum(past + (tile + 1) * BM, length), BN)
++    first = 0
++    if WINDOW:
++        first = tl.maximum(past + tile * BM - WINDOW + 1, 0) // BN
++    width = tl.cdiv(tiles-first, S)
++    for b in range(first + part * width, tl.minimum(first + (part + 1) * width, tiles)):
++        keys = b * BN + n
++        pages = tl.load(Table + keys // PAGE, keys < length, 0)
++        offsets = pages.to(tl.int64) * kb + (keys % PAGE) * ks + (head // G) * kh
++        ptrs = offsets[:, None] + d[None, :]
++        k = _expand(tl.load(K + ptrs, keys[:, None] < length, 0))
++        scores = tl.dot(q, tl.trans(k)) * (scale * 1.4426950408889634)
++        if WINDOW or (b + 1) * BN > past + tile * BM - EXTENT + 1:
++            dist = pos[:, None] - keys[None, :]
++            mask = (dist >= 0) & (keys[None, :] < length)
++            if WINDOW:
++                mask &= dist < WINDOW
++            bias = tl.load(rel[:, None] + keys[None, :],
++                           mask & (dist < EXTENT) & (t[:, None] < T), 0)
++            scores += bias.to(tl.float32) * 1.4426950408889634
++            scores = tl.where(mask, scores, -float("inf"))
++        max_new = tl.maximum(m, tl.max(scores, 1))
++        safe_max = tl.where(max_new == -float("inf"), 0., max_new)
++        p = tl.exp2(scores - safe_max[:, None])
++        alpha = tl.exp2(m - safe_max)
++        v = _expand(tl.load(V + ptrs, keys[:, None] < length, 0))
++        acc = acc * alpha[:, None] + tl.dot(p.to(tl.bfloat16), v)
++        norm = norm * alpha + tl.sum(p, 1)
++        m = max_new
++    idx = (part * T + t) * H + head
++    logz = tl.where(norm == 0, -float("inf"), m + tl.log2(norm))
++    if S == 1:
++        tl.store(LogZ + head * LS + t * LT, logz * 0.6931471805599453, t < T)
++    else:
++        tl.store(LogZ + idx, logz, t < T)
++    tl.store(Out + idx[:, None] * D + d[None, :],
++             acc / tl.where(norm > 0, norm, 1.)[:, None], t[:, None] < T)
++
++
++@triton.jit
++def _merge(P, Z, Out, Lse, T: tl.constexpr, H: tl.constexpr, D: tl.constexpr,
++           S: tl.constexpr, LS: tl.constexpr, LT: tl.constexpr):
++    t = tl.program_id(0)
++    h = tl.program_id(1)
++    s = tl.arange(0, S)
++    d = tl.arange(0, D)
++    idx = (s * T + t) * H + h
++    z = tl.load(Z + idx)
++    top = tl.max(z, 0)
++    w = tl.exp2(z - top)
++    total = tl.sum(w, 0)
++    partial = tl.load(P + idx[:, None] * D + d[None, :])
++    tl.store(Out + (t * H + h) * D + d, tl.sum(partial * (w / total)[:, None], 0))
++    tl.store(Lse + h * LS + t * LT, (top + tl.log2(total)) * 0.6931471805599453)
++
++
++def long_attention(q, k, v, out, lse, rel, table, length, scale,
++                   block_m=32, block_n=64, splits=4, warps=4, window=0):
++    tokens, heads, dim = q.shape
++    partial, logz = out, lse
++    if splits > 1:
++        partial = torch.empty((splits, tokens, heads, dim), device=q.device, dtype=torch.float32)
++        logz = torch.empty((splits, tokens, heads), device=q.device, dtype=torch.float32)
++    _partial[(triton.cdiv(tokens, block_m), heads, splits)](
++        q, k, v, rel, table, partial, logz, length - tokens, length, scale,
++        *q.stride()[:2], *k.stride()[:3], *rel.stride()[:2],
++        tokens, heads, heads // k.shape[2], dim, k.shape[1], rel.shape[2] - 256,
++        splits, block_m, block_n, window, *lse.stride(), num_warps=warps, num_stages=2)
++    if splits > 1:
++        _merge[(tokens, heads)](partial, logz, out, lse, tokens, heads, dim, splits, *lse.stride())
+--- a/nvidia/ops/moe.py
++++ b/nvidia/ops/moe.py
+@@ -623,7 +623,7 @@
+     bias = _load_bias(Bias, E, E_POW2)
+     lo = tl.load(ExpertBounds)
+     hi = tl.load(ExpertBounds + 1)
+-    tl.extra.cuda.gdc_wait()
++    pass
+     if pid < ROUTERS:
+         _k_group_tile(
+             X,
+@@ -747,8 +747,8 @@
+     bias = _load_bias(Bias, E, E_POW2)
+     lo = tl.load(ExpertBounds)
+     hi = tl.load(ExpertBounds + 1)
+-    tl.extra.cuda.gdc_wait()
+-    tl.extra.cuda.gdc_launch_dependents()
++    pass
++    pass
+     token = tl.full((1,), tl.program_id(0), tl.int64)
+     padding = None
+     if Padding is not None:
+@@ -796,9 +796,9 @@
+     token = tl.program_id(0).to(tl.int64)
+     # The tokens are complete before the routing kernel starts.
+     quantized = _quantize_x(X, token, H, NVFP4, HEAD, TAIL)
+-    tl.extra.cuda.gdc_wait()
++    pass
+     if LAUNCH_DEPENDENTS:
+-        tl.extra.cuda.gdc_launch_dependents()
++        pass
+     dst, local = _place_rows(
+         Starts, Ids, Ranks, Weights, Src2Dst, Gammas, Rows, token, TOPK, LOCAL_POW2
+     )
+@@ -843,7 +843,7 @@
+     x = X + token * H
+     # The tokens are complete before the routing kernel starts.
+     amax = _row_amax(x, H)
+-    tl.extra.cuda.gdc_wait()
++    pass
+     dst, local = _place_rows(
+         Starts, Ids, Ranks, Weights, Src2Dst, Gammas, Rows, token, TOPK, LOCAL_POW2
+     )
+@@ -971,7 +971,7 @@
+             num_stages=4,
+             enable_fp_fusion=False,
+             launch_cooperative_grid=True,
+-            launch_pdl=True,
++            launch_pdl=False,
+         )
+         return outputs, quantized
+ 
+@@ -1002,7 +1002,7 @@
+         TILE=plan.tile,
+         MAX_CTAS=plan.max_ctas,
+         num_warps=4 if tokens <= 128 else 1,
+-        launch_pdl=True,
++        launch_pdl=False,
+     )
+     if nvfp4 and tokens >= NVFP4_SCATTER_MIN_TOKENS:
+         _scatter_nvfp4_kernel[(tokens,)](
+@@ -1023,7 +1023,7 @@
+             TILE=plan.tile,
+             num_warps=1,
+             enable_fp_fusion=False,
+-            launch_pdl=True,
++            launch_pdl=False,
+         )
+         return outputs, quantized
+     _scatter_kernel[(tokens,)](
+@@ -1049,7 +1049,7 @@
+         LAUNCH_DEPENDENTS=tokens <= LAUNCH_DEPENDENTS_MAX_TOKENS,
+         num_warps=2,
+         enable_fp_fusion=False,
+-        launch_pdl=True,
++        launch_pdl=False,
+     )
+     return outputs, quantized
+ 
+@@ -1069,9 +1069,9 @@
+     PUSH: tl.constexpr,
+     HALO_ROWS: tl.constexpr,
+ ):
+-    tl.extra.cuda.gdc_wait()
++    pass
+     if LAUNCH_DEPENDENTS:
+-        tl.extra.cuda.gdc_launch_dependents()
++        pass
+     token = tl.program_id(0).to(tl.int64)
+     cols = tl.program_id(1) * BLOCK + tl.arange(0, BLOCK)
+     acc = tl.zeros((BLOCK,), tl.float32)
+@@ -1142,5 +1142,5 @@
+         sp is not None,
+         HALO_ROWS,
+         num_warps=2,
+-        launch_pdl=True,
+-    )
++        launch_pdl=False,
++    )
+--- a/nvidia/ops/moe_sm120.py
++++ b/nvidia/ops/moe_sm120.py
+@@ -108,7 +108,7 @@
+     BK: tl.constexpr,
+ ):
+     T_BLOCKS: tl.constexpr = tl.cdiv(TILE, BT)
+-    tl.extra.cuda.gdc_wait()
++    pass
+     pid_t = tl.program_id(1)
+     tile = pid_t // T_BLOCKS
+     if tile >= tl.load(Tiles + 2 * MAX_CTAS):
+@@ -198,7 +198,7 @@
+             BK=128,
+             num_warps=num_warps,
+             num_stages=3,
+-            launch_pdl=True,
++            launch_pdl=False,
+         )
+         return out
+     assert weight.dtype == torch.uint8
+--- a/nvidia/ops/moe_sm90.py
++++ b/nvidia/ops/moe_sm90.py
+@@ -14,7 +14,7 @@
+ import torch
+ 
+ import vllm.envs as envs
+-from vllm.model_executor.layers.fused_moe.moe_align_block_size import (
++from .align_sm86 import (
+     moe_align_block_size,
+ )
+ from vllm.triton_utils import tl, triton
+--- a/nvidia/ops/mxfp8.py
++++ b/nvidia/ops/mxfp8.py
+@@ -51,7 +51,7 @@
+ 
+ @triton.jit
+ def _mxfp8_quantize_kernel(X, Y, S, M, N: tl.constexpr, BLOCK: tl.constexpr):
+-    tl.extra.cuda.gdc_wait()
++    pass
+     for r in range(tl.program_id(0), M, tl.num_programs(0)):
+         row = tl.cast(r, tl.int64)
+         cols = tl.program_id(1) * BLOCK + tl.arange(0, BLOCK)
+@@ -80,6 +80,6 @@
+         N=n,
+         BLOCK=block,
+         enable_fp_fusion=False,
+-        launch_pdl=True,
++        launch_pdl=False,
+     )
+     return values, scales
+--- a/nvidia/ops/nvfp4.py
++++ b/nvidia/ops/nvfp4.py
+@@ -251,7 +251,7 @@
+ def _nvfp4_quantize_kernel(
+     X, Values, Scales, Amax, M, K: tl.constexpr, BLOCK: tl.constexpr
+ ):
+-    tl.extra.cuda.gdc_wait()
++    pass
+     for row in range(tl.program_id(0), M, tl.num_programs(0)):
+         _quantize_row(X, Values, Scales, Amax, row, K, BLOCK)
+ 
+@@ -282,6 +282,6 @@
+         BLOCK=block,
+         num_warps=num_warps,
+         enable_fp_fusion=False,
+-        launch_pdl=True,
++        launch_pdl=False,
+     )
+     return values, scales, amax
+--- a/nvidia/ops/sconv.py
++++ b/nvidia/ops/sconv.py
+@@ -23,6 +23,7 @@
+ """
+ 
+ import torch
++from .kv_sm86 import encode
+ 
+ from vllm.models.inkling2.nvidia.ops.norm import qr_clip_rel_tokens, rsqrt
+ from vllm.triton_utils import tl, triton
+@@ -248,7 +249,7 @@
+         cached1 = _cached_tap(*taps, 2)
+         cached2 = _cached_tap(*taps, 1)
+         cached3 = _cached_tap(*taps, 0)
+-        tl.extra.cuda.gdc_wait()
++        pass
+ 
+     dtype = cache_ptr.dtype.element_ty
+     cur = tl.load(x_ptr + toff[:, None] * stride_x + coff[None, :], mask=tc_mask)
+@@ -335,7 +336,7 @@
+     first = tl.program_id(0) * BT
+     tile_reads_cache = True
+     if SKIP_IDLE_CACHE:
+-        tl.extra.cuda.gdc_wait()
++        pass
+         # Request starts are non-decreasing: no token of the tile is among the
+         # first W - 1 of its request unless the last token's request starts
+         # after first - (W - 1).
+@@ -458,7 +459,7 @@
+         SKIP_IDLE_CACHE=prefill,
+         num_warps=4,
+         enable_fp_fusion=False,
+-        launch_pdl=True,
++        launch_pdl=False,
+     )
+     return out
+ 
+@@ -554,9 +555,9 @@
+     QR_TOKENS: tl.constexpr,
+     FUSE_QR: tl.constexpr,
+ ):
+-    tl.extra.cuda.gdc_wait()
++    pass
+     # The decode attention kernel prefetches cached keys meanwhile.
+-    tl.extra.cuda.gdc_launch_dependents()
++    pass
+     # Programs (tile, head, 0 | 1) run the K | V conv of one KV head; programs
+     # (tile, head, 2) clip q of QR_TOKENS of the tile's tokens and programs
+     # (tile, head, 3 + c) their r and column block c of the relative logits.
+@@ -700,7 +701,7 @@
+         BLOCK_HQ,
+         BLOCK_E,
+     )
+-    tl.extra.cuda.gdc_wait()
++    pass
+ 
+ 
+ @triton.jit
+@@ -810,7 +811,10 @@
+         + head * stride_kv_h
+         + d_idx[None, :]
+     )
+-    tl.store(dst, y.to(cache.dtype.element_ty), mask=(kv_slot >= 0)[:, None])
++    if cache.dtype.element_ty == tl.uint8:
++        tl.store(dst, encode(y), mask=(kv_slot >= 0)[:, None])
++    else:
++        tl.store(dst, y.to(cache.dtype.element_ty), mask=(kv_slot >= 0)[:, None])
+ 
+ 
+ # From this many tokens, q/r run in their own launch (8 tokens per program)
+@@ -980,7 +984,7 @@
+         FUSE_QR=not qr_tokens,
+         num_warps=4,
+         enable_fp_fusion=False,
+-        launch_pdl=True,
++        launch_pdl=False,
+     )
+     if qr_tokens:
+         _qr_rel_kernel[(triton.cdiv(num_tokens, qr_tokens), qr_blocks)](
+@@ -1012,5 +1016,5 @@
+             QR_TOKENS=qr_tokens,
+             num_warps=4,
+             enable_fp_fusion=False,
+-            launch_pdl=True,
++            launch_pdl=False,
+         )
+--- /dev/null
++++ b/nvidia/ops/tier_hybrid.py
+@@ -0,0 +1,61 @@
++"""Evaluate a dense FA2 prefix with the original relative-bias tail on SM86."""
++import torch
++from vllm.triton_utils import triton, tl
++from vllm.vllm_flash_attn import flash_attn_varlen_func
++from vllm.models.inkling2.nvidia.ops.attention_sm90 import MODE_OUT_LSE, rel_attention
++from vllm.models.inkling2.nvidia.ops.kv_sm86 import decode
++
++
++@triton.jit
++def _unpack(K, V, Table, Buf, start, N: tl.constexpr, PAGE: tl.constexpr,
++            H: tl.constexpr, D: tl.constexpr, KB: tl.constexpr, KS: tl.constexpr,
++            KH: tl.constexpr, B: tl.constexpr):
++    t = tl.program_id(0) * B + tl.arange(0, B)
++    h = tl.program_id(1)
++    d = tl.arange(0, D)
++    page = tl.load(Table + (start + t) // PAGE)
++    # Serving block IDs can land beyond 2 GiB in the shared FP8 allocation.
++    off = (page.to(tl.int64) * KB + ((start+t) % PAGE)*KS + h*KH)[:, None] + d[None, :]
++    dest = (t*H*D + h*D)[:, None] + d[None, :]
++    tl.store(Buf + dest, decode(tl.load(K + off)))
++    tl.store(Buf + N*H*D + dest, decode(tl.load(V + off)))
++
++
++@triton.jit
++def _join(F, Z, Near, NZ, old_stride, old_token, T: tl.constexpr, H: tl.constexpr,
++          D: tl.constexpr, S: tl.constexpr, BS: tl.constexpr,
++          ZH: tl.constexpr, ZT: tl.constexpr):
++    t = tl.program_id(0)
++    h = tl.program_id(1)
++    s = tl.arange(0, BS)
++    d = tl.arange(0, D)
++    z = tl.load(Z+h*ZH+(s*T+t)*ZT, s<S, -float('inf'))
++    oldz = tl.load(NZ+h*old_stride+t*old_token)
++    m = tl.maximum(tl.max(z,0), oldz)
++    w = tl.exp(z-m)
++    ow = tl.exp(oldz-m)
++    denom = tl.sum(w,0)+ow
++    f = tl.load(F + (((s*T+t)*H+h)*D)[:,None]+d[None,:], (s<S)[:,None], 0).to(tl.float32)
++    near = tl.load(Near + (t*H+h)*D+d)
++    tl.store(Near+(t*H+h)*D+d, (tl.sum(f*w[:,None],0)+near*ow)/denom)
++    tl.store(NZ+h*old_stride+t*old_token, m+tl.log(denom))
++
++
++def hybrid(q,k,v,out,lse,rel,table,length,scale,cu,seq,block=2048,group=8):
++    t,h,d=q.shape
++    extent=rel.shape[2]-256
++    far=max(0,(length-t-extent+1)//block*block)
++    rel_attention(q,k,v,out,lse,rel,block_table=table[:,far//k.shape[1]:],
++                  cache_seqlens=seq-far,cu_seqlens_q=cu,max_query_len=t,
++                  softmax_scale=scale,window=0,num_splits=1,mode=MODE_OUT_LSE)
++    for start in range(0,far,block*group):
++        n=min(block*group,far-start)
++        s=n//block
++        buf=torch.empty((2,n,k.shape[2],d),dtype=q.dtype,device=q.device)
++        _unpack[(n//8,k.shape[2])](k,v,table,buf,start,n,k.shape[1],k.shape[2],d,*k.stride()[:3],8)
++        cq=torch.arange(s+1,device=q.device,dtype=torch.int32)*t
++        ck=torch.arange(s+1,device=q.device,dtype=torch.int32)*block
++        f,z=flash_attn_varlen_func(q.repeat(s,1,1),buf[0],buf[1],t,cq,block,cu_seqlens_k=ck,
++                                   softmax_scale=scale,causal=False,fa_version=2,return_softmax_lse=True)
++        assert z.shape==(h,s*t), z.shape
++        _join[(t,h)](f,z,out,lse,*lse.stride(),t,h,d,s,triton.next_power_of_2(s),*z.stride())
+--- /dev/null
++++ b/nvidia/ops/verify_route.py
+@@ -0,0 +1,31 @@
++"""Pack short verification batches for Humming in one CTA on SM86."""
++from vllm.triton_utils import tl, triton
++
++
++@triton.jit
++def _maximum(a, b):
++    return tl.maximum(a, b)
++
++
++@triton.jit
++def pack_verify(Ids, Sorted, Experts, Padded, R: tl.constexpr, E: tl.constexpr,
++                BM: tl.constexpr, BR: tl.constexpr, BW: tl.constexpr):
++    lane = tl.arange(0, BR)
++    ids = tl.load(Ids + lane, lane < R, -1)
++    # Sort by expert, then original routing slot. Padding sorts after all experts.
++    ordered = tl.sort(tl.where(ids >= 0, ids, E) * BR + lane, descending=False)
++    expert = ordered // BR
++    valid = expert < E
++    prev = tl.gather(expert, tl.maximum(lane - 1, 0), 0)
++    nxt = tl.gather(expert, tl.minimum(lane + 1, BR - 1), 0)
++    starts = valid & ((lane == 0) | (expert != prev))
++    ends = valid & ((lane == BR - 1) | (expert != nxt))
++    block = tl.cumsum(starts.to(tl.int32), 0) - 1
++    start_lane = tl.associative_scan(tl.where(starts, lane, 0), 0, _maximum)
++    rank = lane - start_lane
++    tl.store(Sorted + block * BM + rank, ordered % BR, valid)
++    tl.store(Experts + block, expert, starts)
++    offset = tl.arange(0, BW)
++    tl.store(Sorted + block[:, None] * BM + offset[None, :], R,
++             ends[:, None] & (offset[None, :] > rank[:, None]) & (offset[None, :] < BM))
++    tl.store(Padded, tl.sum(starts.to(tl.int32), 0) * BM)
+--- a/nvidia/vision.py
++++ b/nvidia/vision.py
+@@ -91,7 +91,7 @@
+         else:
+             from vllm.vllm_flash_attn import flash_attn_varlen_func
+ 
+-            version = 2 if current_platform.is_device_capability_family(120) else 3
++            version = 2  # SM86 vision uses FlashAttention 2
+             out = flash_attn_varlen_func(q, k, v, fa_version=version, **kwargs)
+         return self.out_proj(out.view(hidden.shape))
+ 
+--- a/quant_config.py
++++ b/quant_config.py
+@@ -43,7 +43,7 @@
+ 
+     @classmethod
+     def get_min_capability(cls) -> int:
+-        return 90
++        return 86
+ 
+     @staticmethod
+     def get_config_filenames() -> list[str]:
