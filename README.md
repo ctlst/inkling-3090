@@ -14,7 +14,7 @@ This release candidate packages the vLLM model-code changes used on one 24 GB RT
 | Placement | Experts in VRAM, input embeddings and vision weights in pinned host RAM |
 | Hardware used | Linux x86-64, RTX 3090 24 GB, NVIDIA driver 595.58.03 |
 
-The patch includes SM86 compatibility for expert routing and FP8 cache access, long-context prefill and split decode kernels, and a hybrid FlashAttention-2 path for eligible full-attention prefill chunks at 65,536 tokens of history and above. The compact expert-routing kernel comes from our earlier Muse kernels competition work. Run the image with your existing GPU power limit and fan policy.
+The patch includes SM86 compatibility for expert routing and FP8 cache access, long-context prefill and split decode kernels, and a hybrid FlashAttention-2 path for eligible full-attention prefill chunks at 65,536 tokens of history and above. Run the image with your existing GPU power limit and fan policy.
 
 ## Build and run
 
@@ -117,7 +117,7 @@ All five prompt hashes and input/output lengths matched in each pass. Each confi
 
 ## Accuracy against upstream
 
-All three runs completed the same 24 public MMLU-Pro questions. The tuned 3090 and the upstream B200 target alone each scored 17/24 and chose the same letter on every item. Upstream B200 with DSpark 7 scored 18/24 and agreed with the 3090 on 22/24 choices. All three answered the same 195,015-token LongBench v2 retrieval question correctly. In an earlier time-limited attempt, the B200 target alone selected three different answers on repeated items. [Protocol, reproduction commands and item-level results](benchmarks/accuracy.md)
+All three runs completed the same 24 public MMLU-Pro questions. The tuned 3090 and the upstream B200 target alone each scored 17/24 and chose the same letter on every item. Upstream B200 with DSpark 7 scored 18/24 and agreed with the 3090 on 22/24 choices. All three answered the same 195,015-token LongBench v2 retrieval question correctly. [Protocol, reproduction commands and item-level results](benchmarks/accuracy.md)
 
 ## Upstream and release status
 

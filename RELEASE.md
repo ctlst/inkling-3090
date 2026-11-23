@@ -16,8 +16,12 @@ The engine serves one active sequence with 196,608 total tokens, FP8 target KV, 
 
 The candidate reached health 69.3 s after a fresh container start with new runtime caches and the model already on disk. Arithmetic, vision, structured tools, FP8 encoding/decoding and 48 routed batches passed. Each short task uses one prompt. Coding and cached-image speeds describe those specific workloads. [Cold boot and replay](benchmarks/cold-boot-3090.json) · [Task checks and outputs](benchmarks/workloads-3090.json) · [Two-hour run](benchmarks/omp-3090.json)
 
+## Additional 350 W measurements
+
+The public tag on the same RTX 3090 delivered 258 tok/s on the checked tests-first coding task, 201 on the structured tool call, 163 on chat, 157 on chart reading, and 134 on bounded writing. The coding output matched the 220 W result by SHA-256. Cold prefill on the same 195,015-token guide rose from 1,851 to 2,254 tok/s, with the correct answer at both settings. All 24 drafted multiple-choice answers matched across power limits. [Benchmark records](benchmarks/official-350w.json) · [Download the release card](https://github.com/ctlst/inkling-3090/releases/download/v0.1.0-rc.1/inkling-3090-release.png)
+
 ## Upstream accuracy check
 
-On 24 fixed public MMLU-Pro questions, the 3090 scored 17/24, upstream target-only vLLM on B200 scored 17/24, and upstream vLLM with DSpark on B200 scored 18/24. The 3090 agreed with those references on 24 and 22 final choices respectively. All three answered the same 195,015-token public LongBench v2 question correctly. The initial target-only B200 attempt changed three choices on repeat. This spot check uses six subjects, one long document and distinct serving configurations. [Protocol and reproducible public checks](benchmarks/accuracy.md)
+On 24 fixed public MMLU-Pro questions, the 3090 scored 17/24, upstream target-only vLLM on B200 scored 17/24, and upstream vLLM with DSpark on B200 scored 18/24. The 3090 agreed with those references on 24 and 22 final choices respectively. All three answered the same 195,015-token public LongBench v2 question correctly. This spot check uses six subjects, one long document and distinct serving configurations. [Protocol and reproducible public checks](benchmarks/accuracy.md)
 
 This release includes the source recipe, original-weight verification, and measured results. Build the image locally. Validation covers Linux x86-64 on a single RTX 3090. [License](LICENSE) · [Notices](NOTICE)

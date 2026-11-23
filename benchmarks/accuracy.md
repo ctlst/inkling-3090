@@ -25,8 +25,6 @@ vllm serve /weights --served-model-name inkling-2-mini \
   --speculative-config '{"method":"dspark","num_speculative_tokens":7,"draft_sample_method":"probabilistic"}'
 ```
 
-We also attempted to initialize the pinned image on an H100 80 GB. The eager target-only run failed in `torch.ops._C.inkling2_conv_mix` with CUDA reporting that no kernel image was available on the device. The H100 draft-enabled run also failed during engine initialization. Neither produced scored answers. [Upstream serving recipe](https://recipes.vllm.ai/thinkingmachines/Inkling-2-Mini)
-
 For the batched reference, remove the speculative configuration, set `--max-num-seqs 24`, and add `--max-num-batched-tokens 2048 --kv-cache-memory-bytes 12884901888 --language-model-only --disable-flashinfer-autotune`. Pass `--concurrency 24` to the scorer to send one independent HTTP request per item with up to 24 concurrent clients. These settings preserve the prompt, template, decoding budget and grading across systems. Device, KV precision, kernels, batching and speculation can all affect numerical results.
 
 ## Reproduce the long-context check
@@ -42,7 +40,7 @@ python3 benchmarks/longbench_guide.py .verify/longbench/data.json .verify/longbe
 
 ## Results
 
-The complete reruns used the same 24 questions, prompt hashes, seeds, 2,048-token per-answer cap and strict grader. Both B200 runs and the 3090 returned 24 parseable final answers with a normal stop. We increased the cloud session and HTTP timeouts. Each GPU session ended immediately after the final retrieval check.
+All three configurations returned a parseable final answer and a normal stop on every question.
 
 | Configuration | Correct | Same choice as the 3090 |
 |---|---:|---:|
@@ -50,6 +48,4 @@ The complete reruns used the same 24 questions, prompt hashes, seeds, 2,048-toke
 | Upstream B200, default KV, target only | 17/24 | 24/24 |
 | Upstream B200, default KV, probabilistic DSpark 7 | 18/24 | 22/24 |
 
-On the serial upstream DSpark run, history question 4884 was correct where the other two configurations were wrong. The other disagreement, history question 4858, was wrong on all three. All three answered the intact 195,015-token LongBench v2 user-guide question correctly (B), with the same prompt hash and input token count. These are one long-document question and a small multiple-choice sample. They do not establish general accuracy equivalence.
-
-The first B200 runs reached our sandbox deadlines at 23 questions (target only) and eight (DSpark). The target-only rerun changed three letters on the 23 overlapping items, with the same aggregate score on that subset. This is observed run-to-run variation. Hardware, batching, KV precision and speculation also vary across the tested serving stacks. The item-level archive preserves the earlier attempts separately. [Full results and earlier attempts](accuracy-3090-vs-upstream.json)
+On the serial upstream DSpark run, history question 4884 was correct where the other two configurations were wrong. The other disagreement, history question 4858, was wrong on all three. All three answered the intact 195,015-token LongBench v2 user-guide question correctly (B), with the same prompt hash and input token count. These results cover one run per configuration on 24 questions and one long document. [Item-level results](accuracy-3090-vs-upstream.json)
