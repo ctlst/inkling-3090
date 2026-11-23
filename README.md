@@ -30,8 +30,6 @@ docker compose up -d --build
 docker compose logs -f inkling
 ```
 
-On macOS, use `shasum -a 256 -c "$manifest"` in the checkpoint directory for the verification step.
-
 The default endpoint is loopback port 8000. Set `PORT` before startup to choose another local port. Once the server reports ready, run the following checks.
 
 ```bash
