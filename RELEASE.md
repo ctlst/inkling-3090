@@ -12,13 +12,13 @@ The engine serves one active sequence with 196,608 total tokens, FP8 target KV, 
 | Tests-first coding | 233 decode tok/s, 17 external checks and 22 generated self-tests passed at 220 W |
 | Five-turn agent replay | 130.84 s with cold prefixes, 43.73 s with shared prefixes at 220 W |
 | Cold 195,015-token retrieval | Correct B, 105.36 s to first token, 1,851 prompt tok/s and 95.2 decode tok/s at 220 W |
-| Two-hour app-building session | 171.9 active decode tok/s and 150.1 wall-clock output tok/s, including reasoning and retries, mostly at 350 W |
+| Two-hour app-building session | 171.9 active decode tok/s and 150.1 wall-clock output tok/s, including reasoning and retries |
 
 The candidate reached health 69.3 s after a fresh container start with new runtime caches and the model already on disk. Arithmetic, vision, structured tools, FP8 encoding/decoding and 48 routed batches passed. Each short task uses one prompt. Coding and cached-image speeds describe those specific workloads. [Cold boot and replay](benchmarks/cold-boot-3090.json) · [Task checks and outputs](benchmarks/workloads-3090.json) · [Two-hour run](benchmarks/omp-3090.json)
 
 ## Additional 350 W measurements
 
-The public tag on the same RTX 3090 delivered 258 tok/s on the checked tests-first coding task, 201 on the structured tool call, 163 on chat, 157 on chart reading, and 134 on bounded writing. The coding output matched the 220 W result by SHA-256. Cold prefill on the same 195,015-token guide rose from 1,851 to 2,254 tok/s, with the correct answer at both settings. All 24 drafted multiple-choice answers matched across power limits. [Benchmark records](benchmarks/official-350w.json) · [Download the release card](https://github.com/ctlst/inkling-3090/releases/download/v0.1.0-rc.1/inkling-3090-release.png)
+The public tag on the same RTX 3090 delivered 258 tok/s on the checked tests-first coding task, 201 on the structured tool call, 163 on chat, 157 on chart reading, and 134 on bounded writing. Cold prefill on the same 195,015-token guide rose from 1,851 to 2,254 tok/s. [Benchmark records](benchmarks/official-350w.json) · [Download the release card](https://github.com/ctlst/inkling-3090/releases/download/v0.1.0-rc.1/inkling-3090-release.png)
 
 ## Upstream accuracy check
 

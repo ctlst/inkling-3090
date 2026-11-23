@@ -63,7 +63,7 @@ The 350 W results use the public tag built on the same GPU, with the same offici
 | Tests-first coding, decode tok/s | 96.0 | 258.2 |
 | Coding result | Python syntax error, failed | 17 external checks and 22 self-tests passed |
 
-Each long row represents one measured run per mode. The cold guide had zero prefix hits. With DSpark at 350 W its first token arrived in 86.5 s, compared with 105.4 s at 220 W. Both power settings produced the same passing source file on the drafted coding task. The drafted 350 W run also matched all 24 final multiple-choice answers from the drafted 220 W run. The 350 W sweep peaked at 73°C core temperature. NVIDIA reported the software thermal slowdown flag on 4 of 530 two-second samples and the hardware thermal slowdown flag on zero. The card returned to 220 W after testing.
+Each long row represents one measured run per mode. The cold guide had zero prefix hits. With DSpark at 350 W its first token arrived in 86.5 s, compared with 105.4 s at 220 W. The 350 W sweep peaked at 73°C core temperature. NVIDIA reported the software thermal slowdown flag on 4 of 530 two-second samples and the hardware thermal slowdown flag on zero. The card returned to 220 W after testing.
 
 ## Measurements on the reference deployment
 
@@ -75,7 +75,7 @@ Each long row represents one measured run per mode. The cold guide had zero pref
 | Output over total elapsed time | 150.1 tok/s |
 | Output tokens, including reasoning and retries | 1,079,250 |
 
-The 119.8-minute workload built and tested offline apps. We measured this workload with the reference card capped at 350 W for 98% of samples and 220 W for the remainder. Of 57 attempts, 31 passed the desktop, mobile and behavioral checks, including seven after app repair. Another 23 had failing checks and three were incomplete. These measurements describe the live deployment from which the patch was extracted. The packaged candidate has since passed a separate cold boot and replay at the reference box’s existing 220 W limit. [Session measurements](benchmarks/omp-3090.json)
+The 119.8-minute workload built and tested offline apps. Of 57 attempts, 31 passed the desktop, mobile and behavioral checks, including seven after app repair. Another 23 had failing checks and three were incomplete. These measurements describe the live deployment from which the patch was extracted. The packaged candidate has since passed a separate cold boot and replay at the reference box’s existing 220 W limit. [Session measurements](benchmarks/omp-3090.json)
 
 ### How much does drafting help?
 
